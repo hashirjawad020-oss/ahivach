@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHIVACH Live Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 20px;
+  }
+  .header {
+    background: #0D2137;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .header h1 { font-size: 24px; }
+  .header p { color: #C9960C; font-size: 14px; margin-top: 4px; }
+  .header .sub { color: #9FB3C8; font-size: 12px; margin-top: 8px; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    border-left: 4px solid #0D2137;
+  }
+  .stat .number { font-size: 32px; font-weight: bold; color: #0D2137; }
+  .stat .label { font-size: 12px; color: #666; margin-top: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th { background: #0D2137; color: white; padding: 12px; text-align: left; font-size: 13px; }
+  td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  .snake-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: bold; color: white;
+  }
+  .cobra { background: #8E44AD; }
+  .krait { background: #2C3E50; }
+  .russells { background: #B03A2E; }
+  .sawscaled { background: #D4850A; }
+  .unknown { background: #7F8C8D; }
+  .channel-badge {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-size: 11px; background: #EBF5FB; color: #1B3A5C;
+  }
+  .loading { text-align: center; padding: 40px; color: #666; }
+  .refresh {
+    background: #B03A2E; color: white; border: none; padding: 8px 16px;
+    border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 8px;
+  }
+  .footer-links { text-align: center; margin-top: 16px; font-size: 13px; }
+  .footer-links a { color: #0D2137; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐍 AHIVACH Live Case Dashboard</h1>
+  <p>One Voice. Zero Venom. Zero Deaths.</p>
+  <div class="sub" id="backend-status">Loading backend info...</div>
+  <button class="refresh" onclick="loadCases()">Refresh Cases</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="number" id="total">—</div><div class="label">Total Cases</div></div>
+  <div class="stat"><div class="number" id="whatsapp">—</div><div class="label">Via WhatsApp</div></div>
+  <div class="stat"><div class="number" id="ivr">—</div><div class="label">Via IVR / Call</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Time</th><th>Channel</th><th>Snake Identified</th><th>Contact</th></tr>
+  </thead>
+  <tbody id="cases-body">
+    <tr><td colspan="4" class="loading">Loading cases...</td></tr>
+  </tbody>
+</table>
+
+<div class="footer-links">
+  <a href="/simulator">Open simulator to create a test case →</a>
+</div>
+
+<script>
+function getSnakeClass(snake) {
+  if (!snake) return "unknown";
+  if (snake.includes("Cobra")) return "cobra";
+  if (snake.includes("Krait")) return "krait";
+  if (snake.includes("Russell")) return "russells";
+  if (snake.includes("Saw")) return "sawscaled";
+  return "unknown";
+}
+
+function formatTime(timestamp) {
+  if (!timestamp) return "—";
+  const d = new Date(timestamp);
+  if (isNaN(d.getTime())) return timestamp;
+  return d.toLocaleString("en-IN", {
+    day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+  });
+}
+
+function maskContact(contact) {
+  if (!contact) return "—";
+  return contact.replace(/(\+?\d{2,3})(\d+)(\d{4})/, "$1****$3");
+}
+
+async function loadStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    document.getElementById('backend-status').textContent =
+      `Database: ${data.database_backend}  ·  Hospital alerts: ${data.notification_backend}`;
+  } catch (e) {
+    document.getElementById('backend-status').textContent = 'Could not reach backend.';
+  }
+}
+
+async function loadCases() {
+  try {
+    const res = await fetch('/api/cases?limit=50');
+    const data = await res.json();
+    const cases = data.cases || [];
+
+    document.getElementById("total").textContent = cases.length;
+    document.getElementById("whatsapp").textContent =
+      cases.filter(c => c.channel === "whatsapp").length;
+    document.getElementById("ivr").textContent =
+      cases.filter(c => c.channel === "ivr" || c.channel === "ivr-sim").length;
+
+    const tbody = document.getElementById("cases-body");
+
+    if (cases.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="4" class="loading">
+          No cases yet. Open the simulator (link below) or message
+          your WhatsApp sandbox number to create one.
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = cases.map(c => `
+      <tr>
+        <td>${formatTime(c.created_at)}</td>
+        <td><span class="channel-badge">${
+          c.channel === "whatsapp" ? "📱 WhatsApp" :
+          c.channel === "web" ? "💬 Web Sim" :
+          c.channel === "ivr-sim" ? "📞 Call Sim" : "📞 IVR Call"
+        }</span></td>
+        <td><span class="snake-badge ${getSnakeClass(c.snake_identified)}">${c.snake_identified || "Unknown"}</span></td>
+        <td>${maskContact(c.patient_contact)}</td>
+      </tr>
+    `).join("");
+
+  } catch (error) {
+    document.getElementById("cases-body").innerHTML = `
+      <tr><td colspan="4" class="loading">Error loading cases: ${error}</td></tr>`;
+    console.error(error);
+  }
+}
+
+loadStatus();
+loadCases();
+setInterval(loadCases, 10000);
+</script>
+</body>
+</html>

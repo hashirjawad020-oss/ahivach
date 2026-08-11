@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHIVACH Simulator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    padding: 20px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .header {
+    background: #0D2137;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .header h1 { font-size: 22px; }
+  .header p { color: #C9960C; font-size: 13px; margin-top: 4px; }
+  .status {
+    font-size: 12px;
+    color: #888;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    color: #666;
+    border: 2px solid transparent;
+  }
+  .tab.active {
+    border-color: #0D2137;
+    color: #0D2137;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .chat {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 200px;
+    max-height: 420px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+  .bubble {
+    white-space: pre-wrap;
+    background: #EBF5FB;
+    color: #1B3A5C;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .bubble.warning {
+    background: #FDEDEC;
+    color: #7B241C;
+  }
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  button {
+    flex: 1;
+    min-width: 70px;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn-yes { background: #1E8449; color: white; }
+  .btn-no { background: #B03A2E; color: white; }
+  .btn-digit { background: #0D2137; color: white; flex-basis: 30%; }
+  .btn-restart {
+    background: #EBF5FB;
+    color: #1B3A5C;
+    flex: none;
+    padding: 8px 16px;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .call-status {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .footer-links {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  .footer-links a { color: #0D2137; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐍 AHIVACH Simulator</h1>
+  <p>Test the real bot logic without WhatsApp or a phone</p>
+</div>
+
+<div class="status" id="status">Loading backend status...</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="chat">📱 WhatsApp Sim</div>
+  <div class="tab" data-tab="call">📞 Call Sim</div>
+</div>
+
+<div class="panel active" id="panel-chat">
+  <div class="chat" id="chat-log"></div>
+  <div class="controls" id="chat-controls">
+    <button class="btn-yes" onclick="sendAnswer('yes')">YES</button>
+    <button class="btn-no" onclick="sendAnswer('no')">NO</button>
+  </div>
+  <button class="btn-restart" onclick="restartChat()">Restart conversation</button>
+</div>
+
+<div class="panel" id="panel-call">
+  <div class="chat" id="call-log"></div>
+  <div class="call-status" id="call-status"></div>
+  <div class="controls">
+    <button class="btn-digit" onclick="pressDigit('1')">1 Cobra</button>
+    <button class="btn-digit" onclick="pressDigit('2')">2 Krait</button>
+    <button class="btn-digit" onclick="pressDigit('3')">3 Russell's</button>
+    <button class="btn-digit" onclick="pressDigit('4')">4 Saw-Scaled</button>
+    <button class="btn-digit" onclick="pressDigit('5')">5 Unsure</button>
+  </div>
+  <button class="btn-restart" onclick="restartCall()">Start a new call</button>
+</div>
+
+<div class="footer-links">
+  <a href="/dashboard">View live dashboard →</a>
+</div>
+
+<script>
+function uuid() {
+  return crypto.randomUUID ? crypto.randomUUID() :
+    'xxxx-xxxx-xxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
+}
+
+let chatSessionId = uuid();
+let callSessionId = uuid();
+
+// ── Tabs ───────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Status banner ──────────────────────────────────────
+async function loadStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    document.getElementById('status').innerHTML =
+      `Database: <b>${data.database_backend}</b><br>` +
+      `Hospital alerts: <b>${data.notification_backend}</b>`;
+  } catch (e) {
+    document.getElementById('status').textContent = 'Could not reach backend.';
+  }
+}
+loadStatus();
+
+// ── WhatsApp-style chat simulator ──────────────────────
+function addBubble(containerId, text, isWarning) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'bubble' + (isWarning ? ' warning' : '');
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function chatPost(message) {
+  const res = await fetch('/web/message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: chatSessionId, message })
+  });
+  return res.json();
+}
+
+async function startChat() {
+  document.getElementById('chat-log').innerHTML = '';
+  const data = await chatPost('');
+  addBubble('chat-log', data.reply, data.complete);
+  document.getElementById('chat-controls').style.display = data.complete ? 'none' : 'flex';
+}
+
+async function sendAnswer(answer) {
+  addBubble('chat-log', answer.toUpperCase());
+  const data = await chatPost(answer);
+  addBubble('chat-log', data.reply, data.complete);
+  if (data.complete) {
+    document.getElementById('chat-controls').style.display = 'none';
+  }
+}
+
+function restartChat() {
+  chatSessionId = uuid();
+  document.getElementById('chat-controls').style.display = 'flex';
+  startChat();
+}
+
+// ── Call simulator ──────────────────────────────────────
+async function startCall() {
+  document.getElementById('call-log').innerHTML = '';
+  document.getElementById('call-status').textContent = 'Calling AHIVACH...';
+  const res = await fetch('/web/call/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: callSessionId })
+  });
+  const data = await res.json();
+  document.getElementById('call-status').textContent = '🔊 Playing (spoken aloud on a real call):';
+  addBubble('call-log', data.message);
+}
+
+async function pressDigit(digit) {
+  document.getElementById('call-status').textContent = `You pressed ${digit}. Playing response...`;
+  const res = await fetch('/web/call/keypress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: callSessionId, digit })
+  });
+  const data = await res.json();
+  addBubble('call-log', data.message, true);
+  document.getElementById('call-status').textContent =
+    'Call ended — hospital alerted, case logged.';
+}
+
+function restartCall() {
+  callSessionId = uuid();
+  startCall();
+}
+
+// ── Boot ─────────────────────────────────────────────────
+startChat();
+startCall();
+</script>
+</body>
+</html>
