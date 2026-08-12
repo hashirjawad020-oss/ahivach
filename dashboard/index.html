@@ -67,6 +67,19 @@
   }
   .footer-links { text-align: center; margin-top: 16px; font-size: 13px; }
   .footer-links a { color: #0D2137; }
+  .alert-card {
+    background: white; border-radius: 8px; padding: 14px 16px;
+    margin-bottom: 10px; border-left: 4px solid #B03A2E;
+    font-size: 13px; white-space: pre-wrap; line-height: 1.5;
+    color: #333;
+  }
+  .alert-card .meta { font-size: 11px; color: #999; margin-bottom: 6px; }
+  .alert-sent-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: bold; margin-left: 6px;
+  }
+  .alert-sent-badge.sms { background: #D5F5E3; color: #196F3D; }
+  .alert-sent-badge.logged { background: #FCF3CF; color: #7D6608; }
 </style>
 </head>
 <body>
@@ -92,6 +105,9 @@
     <tr><td colspan="4" class="loading">Loading cases...</td></tr>
   </tbody>
 </table>
+
+<h2 style="margin: 24px 0 10px; font-size: 16px; color: #0D2137;">🏥 Hospital Alerts Fired</h2>
+<div id="alerts-list"></div>
 
 <div class="footer-links">
   <a href="/simulator">Open simulator to create a test case →</a>
@@ -175,9 +191,40 @@ async function loadCases() {
   }
 }
 
+async function loadAlerts() {
+  try {
+    const res = await fetch('/api/alerts?limit=10');
+    const data = await res.json();
+    const alerts = data.alerts || [];
+    const container = document.getElementById('alerts-list');
+
+    if (alerts.length === 0) {
+      container.innerHTML = '<p class="loading">No alerts fired yet — run a test case in the simulator.</p>';
+      return;
+    }
+
+    container.innerHTML = alerts.map(a => `
+      <div class="alert-card">
+        <div class="meta">
+          ${formatTime(a.created_at)} · ${a.channel}
+          <span class="alert-sent-badge ${a.sent_via_sms ? 'sms' : 'logged'}">
+            ${a.sent_via_sms ? '✓ SMS SENT' : 'LOGGED (no SMS provider configured)'}
+          </span>
+        </div>
+        ${a.message}
+      </div>
+    `).join("");
+  } catch (error) {
+    document.getElementById('alerts-list').innerHTML =
+      `<p class="loading">Error loading alerts: ${error}</p>`;
+  }
+}
+
 loadStatus();
 loadCases();
+loadAlerts();
 setInterval(loadCases, 10000);
+setInterval(loadAlerts, 10000);
 </script>
 </body>
 </html>

@@ -159,10 +159,40 @@ COMMON_PROTOCOL = (
     "Do not cut the wound. Do not tie a cloth or tourniquet. "
     "Do not suck the venom. Remove rings and tight clothing near "
     "the bite. Keep the bitten limb below heart level. Do not give "
-    "food, water, or alcohol. Now press a key to identify the snake: "
-    "1 for Indian Cobra, 2 for Common Krait, 3 for Russell's Viper, "
-    "4 for Saw-Scaled Viper, 5 if unsure."
+    "food, water, or alcohol. Now, based on what you saw, press a "
+    "key. Press 1 if it raised a wide hood, like a cobra. "
+    "Press 2 if it was a small dark snake, often a night bite while "
+    "sleeping, like a krait. Press 3 if it was thick-bodied with a "
+    "chain or zigzag pattern, like Russell's viper. Press 4 if it "
+    "was small and sandy-coloured and made a sizzling sound, like a "
+    "saw-scaled viper. Press 5 if you are not sure."
 )
+
+# ── Recommended antivenom-stocked hospitals (Bengaluru) ────
+# Hardcoded for now — a real nearest-hospital-with-ASV-in-stock
+# system needs live inventory data hospitals don't publish, so
+# this is a deliberate, honest MVP scope: we recommend hospitals
+# known to stock polyvalent ASV rather than guessing "nearest."
+# Karnataka has had real district-level ASV shortages (KSMSCL,
+# 2026), so this distinction is a genuine clinical point, not
+# just a scope excuse. Swap/expand this list per-district later.
+RECOMMENDED_HOSPITALS_BENGALURU = [
+    {
+        "name": "St John's Medical College & Hospital",
+        "area": "Koramangala, Bengaluru",
+        "note": "Tertiary care, stocks polyvalent ASV",
+    },
+    {
+        "name": "Bowring & Lady Curzon Hospital",
+        "area": "Shivaji Nagar, Bengaluru",
+        "note": "Government hospital, ASV stocked per Karnataka snakebite protocol",
+    },
+    {
+        "name": "Manipal Hospital (Old Airport Road)",
+        "area": "HAL, Bengaluru",
+        "note": "Tertiary care, stocks polyvalent ASV",
+    },
+]
 
 IVR_WARNINGS = {
     "Indian Cobra": (
@@ -235,3 +265,18 @@ def build_hospital_message(snake, patient_contact, channel):
         f"Administer polyvalent ASV regardless of species.\n"
         f"— AHIVACH System"
     )
+
+
+def recommended_hospitals_text():
+    """
+    Patient-facing text: which hospitals to go to. Not the alert
+    sent TO the hospital — this is shown/spoken to the caller.
+    """
+    lines = [
+        "🏥 Go to a hospital that stocks polyvalent antivenom — not "
+        "just the nearest one. Right antivenom availability matters "
+        "more than distance."
+    ]
+    for h in RECOMMENDED_HOSPITALS_BENGALURU:
+        lines.append(f"• {h['name']} ({h['area']})")
+    return "\n".join(lines)

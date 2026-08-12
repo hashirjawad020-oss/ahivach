@@ -8,7 +8,7 @@ from fastapi import Form, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from notifications import send_hospital_alert
 from database import log_case
-from core import QUESTIONS, FIRST_AID, identify_snake
+from core import QUESTIONS, FIRST_AID, identify_snake, recommended_hospitals_text
 
 # Key = phone number (Twilio's "From", e.g. "whatsapp:+91..."),
 # value = that user's progress through the 4 questions.
@@ -70,7 +70,8 @@ def setup_whatsapp_routes(app):
         snake = identify_snake(session["answers"])
         session["complete"] = True
 
-        msg.body(FIRST_AID[snake])
+        reply = FIRST_AID[snake] + "\n\n" + recommended_hospitals_text()
+        msg.body(reply)
         send_hospital_alert(snake, sender, "whatsapp")
         log_case(sender, "whatsapp", snake, session["answers"])
 
