@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHIVACH :: Prevention &amp; Community Awareness</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { font-size: 16px; }
+  body {
+    font-family: Verdana, Geneva, Arial, sans-serif;
+    background: #EFEAD8;
+    color: #1A1A1A;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  a { color: #0B3D62; }
+  a:visited { color: #5A3D7A; }
+
+  .utility-bar {
+    background: #1A1A1A; color: #D8D2BE; font-size: 0.6875rem;
+    padding: 4px 12px; display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 6px;
+  }
+  .utility-bar a { color: #D8D2BE; text-decoration: none; margin-right: 10px; }
+  .utility-bar a:hover { text-decoration: underline; color: #fff; }
+  .font-controls span {
+    display: inline-block; width: 20px; text-align: center;
+    border: 1px solid #555; margin-left: 3px; cursor: pointer;
+    font-family: Georgia, serif; font-weight: bold;
+  }
+  .font-controls span:hover { background: #333; }
+
+  .tricolor { height: 4px; display: flex; }
+  .tricolor div { flex: 1; }
+  .tricolor .saffron { background: #FF9933; }
+  .tricolor .white { background: #F5F5F5; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+  .tricolor .green { background: #138808; }
+
+  .letterhead {
+    background: #FBF9F1; border-bottom: 3px double #0B3D62; padding: 14px 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .seal { flex-shrink: 0; }
+  .letterhead-text { flex: 1; text-align: center; }
+  .letterhead-text .dept-en {
+    font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem;
+    color: #0B3D62; font-weight: bold; letter-spacing: 0.5px;
+  }
+  .letterhead-text .dept-kn { font-size: 0.75rem; color: #5A5238; margin-top: 1px; }
+  .letterhead-text .cell-name {
+    font-family: Georgia, serif; font-size: 0.8125rem; color: #8B1A1A;
+    margin-top: 5px; font-style: italic;
+  }
+  .file-ref {
+    flex-shrink: 0; text-align: right; font-family: 'Courier New', monospace;
+    font-size: 0.6875rem; color: #5A5238; line-height: 1.6;
+  }
+
+  .gov-nav { background: #0B3D62; display: flex; flex-wrap: wrap; }
+  .gov-nav a {
+    color: #E9E4D4; text-decoration: none; padding: 9px 16px;
+    font-size: 0.75rem; letter-spacing: 0.5px; font-weight: bold;
+    border-right: 1px solid #16537A;
+  }
+  .gov-nav a.active { background: #8B1A1A; color: #fff; }
+  .gov-nav a:hover:not(.active) { background: #16537A; }
+
+  main { max-width: 860px; margin: 18px auto; padding: 0 16px 40px; }
+  .breadcrumb { font-size: 0.6875rem; color: #5A5238; margin-bottom: 14px; }
+
+  .panel-title {
+    font-family: Georgia, serif; font-size: 1rem; color: #0B3D62;
+    border-bottom: 2px solid #0B3D62; padding-bottom: 5px; margin-bottom: 12px;
+  }
+
+  .risk-banner {
+    padding: 12px 16px; border: 1px solid; margin-bottom: 22px;
+    font-weight: bold; font-size: 0.8125rem;
+  }
+  .risk-high   { background: #FBEDEC; border-color: #8B1A1A; color: #8B1A1A; }
+  .risk-medium { background: #FDF6E3; border-color: #B8860B; color: #7A5C00; }
+  .risk-low    { background: #F0F7EC; border-color: #138808; color: #0F5D1F; }
+  .risk-banner .sub { font-weight: normal; font-size: 0.75rem; margin-top: 4px; color: #3A3524; }
+
+  table.district {
+    width: 100%; border-collapse: collapse; background: #FBF9F1;
+    border: 1px solid #8A8370; margin-bottom: 26px;
+  }
+  table.district th {
+    background: #0B3D62; color: #fff; padding: 7px 10px; text-align: left;
+    font-size: 0.6875rem; text-transform: uppercase; font-family: Georgia, serif;
+  }
+  table.district td { padding: 7px 10px; border-bottom: 1px solid #DDD6C0; font-size: 0.75rem; }
+  table.district tr:nth-child(even) td { background: #F4F0E1; }
+  .risk-tag {
+    display: inline-block; padding: 2px 7px; font-size: 0.625rem; font-weight: bold;
+    border: 1px solid; text-transform: uppercase; background: #fff;
+  }
+  .risk-tag.high { color: #8B1A1A; border-color: #8B1A1A; }
+  .risk-tag.medium { color: #B8860B; border-color: #B8860B; }
+  .risk-tag.low { color: #0F5D1F; border-color: #0F5D1F; }
+
+  .data-note {
+    font-size: 0.6875rem; color: #5A5238; font-style: italic; margin: -14px 0 26px;
+  }
+
+  .story-card {
+    background: #FBF9F1; border: 1px solid #8A8370; border-left: 4px solid #B8860B;
+    padding: 14px 16px; margin-bottom: 22px; font-size: 0.8125rem;
+  }
+  .story-card .quote { font-style: italic; margin-bottom: 8px; }
+  .story-card .attribution {
+    font-size: 0.6875rem; color: #5A5238; font-family: 'Courier New', monospace;
+  }
+
+  .checklist { list-style: none; margin-bottom: 26px; }
+  .checklist li {
+    background: #FBF9F1; border: 1px solid #C9C2A6; padding: 8px 12px;
+    margin-bottom: 6px; font-size: 0.8125rem;
+  }
+  .checklist li::before { content: "✓ "; color: #0F5D1F; font-weight: bold; }
+
+  .outreach-box {
+    background: #E4EEF5; border: 1px solid #A9C6DA; padding: 14px 16px; margin-bottom: 26px;
+  }
+  .outreach-box h3 { font-family: Georgia, serif; color: #0B3D62; margin-bottom: 8px; font-size: 0.875rem; }
+  .outreach-box ul { margin-left: 18px; font-size: 0.8125rem; }
+  .outreach-box li { margin-bottom: 4px; }
+
+  footer {
+    background: #0B3D62; color: #C9C2A6; font-size: 0.6875rem; padding: 18px 16px 22px; margin-top: 30px;
+  }
+  footer .foot-inner { max-width: 860px; margin: 0 auto; }
+  footer .foot-links { margin-bottom: 10px; }
+  footer .foot-links a { color: #C9C2A6; margin-right: 14px; text-decoration: none; }
+  footer .foot-links a:hover { text-decoration: underline; color: #fff; }
+  footer .disclaimer { color: #8FA3B5; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="utility-bar">
+  <div>
+    <a href="#main-content">Skip to Main Content</a>
+    <a href="#" onclick="alert('Screen reader access via your browser/OS assistive technology settings.'); return false;">Screen Reader Access</a>
+  </div>
+  <div class="font-controls">
+    Text Size:
+    <span onclick="setFontSize(-1)">A-</span><span onclick="setFontSize(0)">A</span><span onclick="setFontSize(1)">A+</span>
+  </div>
+</div>
+
+<div class="tricolor"><div class="saffron"></div><div class="white"></div><div class="green"></div></div>
+
+<div class="letterhead">
+  <div class="seal">
+    <svg viewBox="0 0 120 120" width="58" height="58">
+      <defs><path id="sealring3" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" /></defs>
+      <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
+      <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
+      <text font-size="6.3" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
+        <textPath href="#sealring3" startOffset="1%">EMERGENCY SNAKEBITE RESPONSE CELL &#8226; GOVT. OF KARNATAKA &#8226;</textPath>
+      </text>
+      <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
+      <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
+      <text x="60" y="85" text-anchor="middle" font-size="5.5" font-family="Verdana, sans-serif" fill="#5A5238">EST. 2026</text>
+    </svg>
+  </div>
+  <div class="letterhead-text">
+    <div class="dept-en">DEPARTMENT OF HEALTH &amp; FAMILY WELFARE</div>
+    <div class="dept-kn">ಆರೋಗ್ಯ ಮತ್ತು ಕುಟುಂಬ ಕಲ್ಯಾಣ ಇಲಾಖೆ &nbsp;·&nbsp; GOVERNMENT OF KARNATAKA</div>
+    <div class="cell-name">AHIVACH — Prevention &amp; Community Awareness</div>
+  </div>
+  <div class="file-ref">CIRCULAR NO: ESRC/2026/PREV<br>MODE: PILOT / DEMO</div>
+</div>
+
+<nav class="gov-nav">
+  <a href="/">HOME</a>
+  <a href="/dashboard">LIVE CASE REGISTER</a>
+  <a href="#" class="active">PREVENTION</a>
+  <a href="/simulator">FILE A TEST CASE</a>
+  <a href="/emergency-card">EMERGENCY CARD</a>
+</nav>
+
+<main id="main-content">
+  <div class="breadcrumb">Home &nbsp;›&nbsp; Emergency Response &nbsp;›&nbsp; <b>Prevention</b></div>
+
+  <div class="panel-title">SEASONAL RISK STATUS</div>
+  <div class="risk-banner" id="risk-banner">
+    Loading seasonal risk assessment…
+  </div>
+
+  <div class="panel-title">ILLUSTRATIVE DISTRICT RISK LEVELS — PILOT REGION</div>
+  <table class="district">
+    <thead><tr><th>District</th><th>Relative Risk (Monsoon)</th><th>Primary Species of Concern</th></tr></thead>
+    <tbody>
+      <tr><td>Chamarajanagar (pilot district)</td><td><span class="risk-tag high">High</span></td><td>Russell's Viper, Cobra</td></tr>
+      <tr><td>Mysuru</td><td><span class="risk-tag medium">Medium</span></td><td>Cobra, Krait</td></tr>
+      <tr><td>Kodagu</td><td><span class="risk-tag medium">Medium</span></td><td>Russell's Viper</td></tr>
+      <tr><td>Bengaluru Rural</td><td><span class="risk-tag low">Low</span></td><td>Cobra</td></tr>
+    </tbody>
+  </table>
+  <div class="data-note">Illustrative placeholder data for the pilot demo — to be replaced with verified district/seasonal snake-activity data before field deployment.</div>
+
+  <div class="panel-title">FROM THE COMMUNITY</div>
+  <div class="story-card">
+    <div class="quote">"We used to think cutting the wound and tying a cloth tight above it would stop the poison. Now our family knows: keep still, keep calm, and get to the hospital that has the injection. That knowledge should have reached us years earlier."</div>
+    <div class="attribution">— Composite account based on farmer/survivor feedback gathered during field consultation. Representative, not a verbatim individual testimonial.</div>
+  </div>
+
+  <div class="panel-title">SCHOOL &amp; COMMUNITY OUTREACH PROGRAMME</div>
+  <div class="outreach-box">
+    <h3>What the outreach layer covers</h3>
+    <ul>
+      <li>Recognising common venomous species without needing to handle or kill the snake</li>
+      <li>Safe footwear and torch use when walking at night or in fields</li>
+      <li>What to do — and what never to do — in the first minutes after a bite</li>
+      <li>When and how to use the WhatsApp / IVR emergency channel</li>
+      <li>Seasonal snake-movement awareness tied to monsoon and harvest cycles</li>
+    </ul>
+  </div>
+
+  <div class="panel-title">HOUSEHOLD PREVENTION CHECKLIST</div>
+  <ul class="checklist">
+    <li>Use a torch and wear closed footwear when walking outdoors after dark</li>
+    <li>Keep the area around the home clear of grain stores, brush and debris where snakes shelter</li>
+    <li>Sleep on a raised bed or use a tucked-in mosquito net</li>
+    <li>Never handle a snake, even if it appears dead or injured</li>
+    <li>Store the AHIVACH helpline number and emergency card somewhere accessible</li>
+  </ul>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Live Case Register</a>
+      <a href="/simulator">File a Test Case</a>
+      <a href="/emergency-card">Emergency Card</a>
+    </div>
+    <div class="disclaimer">
+      This is a demonstration system built for a public-health hackathon (Bengaluru, August 2026).
+      It is not an operational Government of Karnataka service. District risk data and community
+      accounts shown here are illustrative placeholders pending field validation. Content owned and
+      maintained by Team AHIVACH.
+    </div>
+  </div>
+</footer>
+
+<script>
+let fontStep = 0;
+function setFontSize(delta) {
+  fontStep = delta === 0 ? 0 : Math.max(-2, Math.min(3, fontStep + delta));
+  document.documentElement.style.fontSize = (16 + fontStep * 1.5) + 'px';
+}
+
+// Simple seasonal banner — Karnataka snake activity is elevated in the monsoon/post-monsoon
+// window (roughly June–November) when flooding and harvest activity increase human-snake contact.
+function renderRiskBanner() {
+  const month = new Date().getMonth(); // 0=Jan
+  const el = document.getElementById('risk-banner');
+  if (month >= 5 && month <= 10) { // Jun–Nov
+    el.className = 'risk-banner risk-high';
+    el.innerHTML = 'CURRENT STATUS: HIGH — Monsoon / harvest season<div class="sub">Snake movement and human-snake encounters typically rise during this period. Extra caution advised at night and in agricultural areas.</div>';
+  } else if (month === 11 || month === 0) { // Dec–Jan
+    el.className = 'risk-banner risk-low';
+    el.innerHTML = 'CURRENT STATUS: LOW — Winter season<div class="sub">Snake activity is typically reduced in cooler months, though caution remains advised.</div>';
+  } else {
+    el.className = 'risk-banner risk-medium';
+    el.innerHTML = 'CURRENT STATUS: MODERATE — Pre-monsoon season<div class="sub">Activity increases as temperatures rise ahead of the monsoon.</div>';
+  }
+}
+renderRiskBanner();
+</script>
+</body>
+</html>

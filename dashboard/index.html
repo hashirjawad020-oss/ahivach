@@ -245,6 +245,24 @@
     background: #E4EEF5; color: #0B3D62; border: 1px solid #A9C6DA;
   }
 
+  .status-tag {
+    display: inline-block; padding: 2px 7px; font-size: 0.625rem; font-weight: bold;
+    border: 1px solid; text-transform: uppercase; background: #fff;
+  }
+  .status-reported { color: #5A5238; border-color: #5A5238; }
+  .status-hospital_alerted { color: #B8860B; border-color: #B8860B; }
+  .status-rescuer_dispatched { color: #6C1E85; border-color: #6C1E85; }
+  .status-admitted { color: #0B3D62; border-color: #0B3D62; }
+  .status-follow_up_pending { color: #A05A00; border-color: #A05A00; }
+  .status-resolved { color: #0F5D1F; border-color: #0F5D1F; }
+
+  .row-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .row-actions button {
+    font-size: 0.625rem; padding: 3px 6px; background: #F3EFE2;
+    border: 1px outset #B8AF8F; cursor: pointer;
+  }
+  .row-actions button:hover { background: #E8E2CC; }
+
   .loading { text-align: center; padding: 26px; color: #5A5238; font-style: italic; }
 
   /* ── Correspondence / alerts ─────────────────────────── */
@@ -357,7 +375,9 @@
   <a href="/" class="active">HOME</a>
   <a href="#" class="active">LIVE CASE REGISTER</a>
   <a href="#alerts-section">HOSPITAL CORRESPONDENCE</a>
+  <a href="/prevention">PREVENTION</a>
   <a href="/simulator">FILE A TEST CASE</a>
+  <a href="/emergency-card">EMERGENCY CARD</a>
   <a href="/whatsapp-demo">WHATSAPP CHANNEL DEMO</a>
 </nav>
 
@@ -388,10 +408,10 @@
 
   <table>
     <thead>
-      <tr><th>File No.</th><th>Date &amp; Time</th><th>Channel</th><th>Probable Species</th><th>Reporting Contact</th></tr>
+      <tr><th>File No.</th><th>Date &amp; Time</th><th>Channel</th><th>Probable Species</th><th>Reporting Contact</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody id="cases-body">
-      <tr><td colspan="5" class="loading">Loading register…</td></tr>
+      <tr><td colspan="7" class="loading">Loading register…</td></tr>
     </tbody>
   </table>
 
@@ -504,7 +524,7 @@ async function loadCases() {
 
     if (cases.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="5" class="loading">
+        <tr><td colspan="7" class="loading">
           No cases filed yet. Use "File a Test Case" or the WhatsApp Channel Demo
           above to generate a register entry.
         </td></tr>`;
@@ -522,6 +542,13 @@ async function loadCases() {
         }</span></td>
         <td><span class="tag ${getSnakeClass(c.snake_identified)}">${c.snake_identified || "Unknown"}</span></td>
         <td>${maskContact(c.patient_contact)}</td>
+        <td><span class="status-tag status-${c.case_status || 'reported'}">${(c.case_status || 'reported').replace(/_/g, ' ')}</span></td>
+        <td>
+          <div class="row-actions">
+            <button onclick="dispatchRescuer('${c.id}')">Dispatch Rescuer</button>
+            <button onclick="logFollowup('${c.id}')">Log Follow-up</button>
+          </div>
+        </td>
       </tr>
     `).join("");
 
@@ -556,6 +583,43 @@ async function loadAlerts() {
   } catch (error) {
     document.getElementById('alerts-list').innerHTML =
       `<p class="loading">Error loading correspondence log: ${error}</p>`;
+  }
+}
+
+// ── Rescuer dispatch / follow-up (demo-simple prompt-based UI) ─
+// These call the routes in followup_routes_reference.js — wire that
+// file into your Node backend, then these buttons will work.
+async function dispatchRescuer(caseId) {
+  const rescuer_name = prompt('Rescuer name:');
+  if (rescuer_name === null) return;
+  const contact_number = prompt('Rescuer contact number (optional):') || '';
+  try {
+    const res = await fetch(`/api/cases/${caseId}/rescuer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rescuer_name, contact_number })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) {
+    alert('Could not log rescuer dispatch: ' + e.message);
+  }
+}
+
+async function logFollowup(caseId) {
+  const outcome = prompt('Outcome — recovered / still_under_treatment / lost_to_followup / deceased:');
+  if (!outcome) return;
+  const notes = prompt('Notes (optional):') || '';
+  try {
+    const res = await fetch(`/api/cases/${caseId}/followup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ outcome, notes })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) {
+    alert('Could not log follow-up: ' + e.message);
   }
 }
 
