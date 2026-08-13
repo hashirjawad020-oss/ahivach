@@ -2,18 +2,23 @@ from fastapi import Request, Response, Form
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from notifications import send_hospital_alert
 from database import log_case
-from core import SNAKE_MAP, COMMON_PROTOCOL, IVR_WARNINGS
+from core import SNAKE_MAP, IVR_WARNINGS
 
 # ── VOICE SCRIPTS ─────────────────────────────────────────
-# All snake-ID logic and script text now live in core.py —
-# the single source of truth shared with the WhatsApp and
-# web channels. This file only concerns itself with turning
-# that content into TwiML and wiring up Twilio's request/
-# response shape.
+# The common protocol now plays as a real Kannada recording
+# (audio/common_protocol_kannada.mp3) instead of English TTS —
+# it's a spoken SUMMARY covering the key first-aid points and
+# the keypad options, not a word-for-word reading of core.py's
+# COMMON_PROTOCOL text. If a full, section-by-section Kannada
+# recording arrives later, this is the only file that needs to
+# change — swap gather.play(...) below for one .play() per
+# section, same pattern as before.
 #
-# Swap gather.say(...) / response.say(...) for
-# gather.play(URL) / response.play(URL) once you have Kannada
-# MP3s hosted somewhere Twilio can fetch them (see audio/README.md).
+# The 4 species-specific warnings (IVR_WARNINGS in core.py)
+# still use English TTS for now — same swap-in pattern applies
+# once those are recorded too.
+
+COMMON_PROTOCOL_AUDIO_PATH = "/audio/common_protocol_kannada.mp3"
 
 # ── IVR ROUTES ────────────────────────────────────────────
 # These get added to main.py's app object
@@ -25,7 +30,8 @@ def setup_ivr_routes(app):
     async def voice_incoming(request: Request):
         """
         Fires when someone calls your Twilio IVR number.
-        Plays the common protocol, then waits for a keypress.
+        Plays the Kannada common-protocol recording, then waits
+        for a keypress.
 
         IMPORTANT: this function only BUILDS the TwiML — it
         does not know yet whether the caller will press a key.
@@ -35,13 +41,15 @@ def setup_ivr_routes(app):
         bug in the original version: it fired a bogus "Unknown"
         hospital alert and case-log on every single call.
 
-        So this route does ONE thing: play the protocol and
+        So this route does ONE thing: play the recording and
         gather a keypress. action_on_empty_result=True makes
         Twilio call /voice/snake-selected even on timeout (with
         Digits empty) instead of silently hanging up — that
         route is where the real alert + log happens exactly once,
         whether the caller pressed a key or not.
         """
+        base_url = str(request.base_url).rstrip("/")
+
         response = VoiceResponse()
 
         gather = Gather(
@@ -51,7 +59,15 @@ def setup_ivr_routes(app):
             timeout=10,
             action_on_empty_result=True,
         )
-        gather.say(COMMON_PROTOCOL, language="en-IN")
+        gather.play(base_url + COMMON_PROTOCOL_AUDIO_PATH)
+        # Keypad menu spoken in English after the Kannada summary,
+        # since the recording itself doesn't include per-digit
+        # prompts. Caller can press any time during either part.
+        gather.say(
+            "Press 1 for cobra, 2 for krait, 3 for Russell's viper, "
+            "4 for saw-scaled viper, 5 if unsure.",
+            language="en-IN",
+        )
         response.append(gather)
 
         # Safety net: only reached if action_on_empty_result somehow

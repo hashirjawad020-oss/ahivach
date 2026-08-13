@@ -130,7 +130,8 @@ def test_voice_incoming_does_not_fire_alert_or_log(client):
     """
     r = client.post("/voice", data={"From": "+919876543210"})
     assert r.status_code == 200
-    assert "AHIVACH Snakebite Emergency" in r.text
+    assert "common_protocol_kannada.mp3" in r.text
+    assert "<Play>" in r.text
     assert not DATA_DIR.exists() or not (DATA_DIR / "cases.json").exists()
     assert not DATA_DIR.exists() or not (DATA_DIR / "hospital_alerts.json").exists()
 

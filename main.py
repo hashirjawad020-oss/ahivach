@@ -57,6 +57,20 @@ def dashboard_page():
     return FileResponse(BASE_DIR / "dashboard" / "index.html")
 
 
+@app.get("/audio/{filename}")
+def audio_file(filename: str):
+    # Twilio's gather.play() / response.play() needs a plain
+    # public HTTPS URL to fetch audio from — this serves whatever
+    # is in the audio/ folder. filename is constrained to this
+    # folder only (no path traversal) since FastAPI's path param
+    # doesn't include slashes by default.
+    path = BASE_DIR / "audio" / filename
+    if not path.is_file():
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    return FileResponse(path, media_type="audio/mpeg")
+
+
 @app.get("/simulator")
 def simulator_page():
     return FileResponse(BASE_DIR / "pages" / "simulator.html")
