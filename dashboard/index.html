@@ -1,230 +1,776 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AHIVACH Live Dashboard</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f4f8;
-    padding: 20px;
-  }
-  .header {
-    background: #0D2137;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-  }
-  .header h1 { font-size: 24px; }
-  .header p { color: #C9960C; font-size: 14px; margin-top: 4px; }
-  .header .sub { color: #9FB3C8; font-size: 12px; margin-top: 8px; }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .stat {
-    background: white;
-    padding: 16px;
-    border-radius: 8px;
-    text-align: center;
-    border-left: 4px solid #0D2137;
-  }
-  .stat .number { font-size: 32px; font-weight: bold; color: #0D2137; }
-  .stat .label { font-size: 12px; color: #666; margin-top: 4px; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th { background: #0D2137; color: white; padding: 12px; text-align: left; font-size: 13px; }
-  td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-  tr:last-child td { border-bottom: none; }
-  tr:nth-child(even) { background: #f8f9fa; }
-  .snake-badge {
-    display: inline-block; padding: 3px 10px; border-radius: 12px;
-    font-size: 11px; font-weight: bold; color: white;
-  }
-  .cobra { background: #8E44AD; }
-  .krait { background: #2C3E50; }
-  .russells { background: #B03A2E; }
-  .sawscaled { background: #D4850A; }
-  .unknown { background: #7F8C8D; }
-  .channel-badge {
-    display: inline-block; padding: 3px 8px; border-radius: 4px;
-    font-size: 11px; background: #EBF5FB; color: #1B3A5C;
-  }
-  .loading { text-align: center; padding: 40px; color: #666; }
-  .refresh {
-    background: #B03A2E; color: white; border: none; padding: 8px 16px;
-    border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 8px;
-  }
-  .footer-links { text-align: center; margin-top: 16px; font-size: 13px; }
-  .footer-links a { color: #0D2137; }
-  .alert-card {
-    background: white; border-radius: 8px; padding: 14px 16px;
-    margin-bottom: 10px; border-left: 4px solid #B03A2E;
-    font-size: 13px; white-space: pre-wrap; line-height: 1.5;
-    color: #333;
-  }
-  .alert-card .meta { font-size: 11px; color: #999; margin-bottom: 6px; }
-  .alert-sent-badge {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 10px; font-weight: bold; margin-left: 6px;
-  }
-  .alert-sent-badge.sms { background: #D5F5E3; color: #196F3D; }
-  .alert-sent-badge.logged { background: #FCF3CF; color: #7D6608; }
-</style>
-</head>
-<body>
-
-<div class="header">
-  <h1>🐍 AHIVACH Live Case Dashboard</h1>
-  <p>One Voice. Zero Venom. Zero Deaths.</p>
-  <div class="sub" id="backend-status">Loading backend info...</div>
-  <button class="refresh" onclick="loadCases()">Refresh Cases</button>
-</div>
-
-<div class="stats">
-  <div class="stat"><div class="number" id="total">—</div><div class="label">Total Cases</div></div>
-  <div class="stat"><div class="number" id="whatsapp">—</div><div class="label">Via WhatsApp</div></div>
-  <div class="stat"><div class="number" id="ivr">—</div><div class="label">Via IVR / Call</div></div>
-</div>
-
-<table>
-  <thead>
-    <tr><th>Time</th><th>Channel</th><th>Snake Identified</th><th>Contact</th></tr>
-  </thead>
-  <tbody id="cases-body">
-    <tr><td colspan="4" class="loading">Loading cases...</td></tr>
-  </tbody>
-</table>
-
-<h2 style="margin: 24px 0 10px; font-size: 16px; color: #0D2137;">🏥 Hospital Alerts Fired</h2>
-<div id="alerts-list"></div>
-
-<div class="footer-links">
-  <a href="/simulator">Open simulator to create a test case →</a>
-</div>
-
-<script>
-function getSnakeClass(snake) {
-  if (!snake) return "unknown";
-  if (snake.includes("Cobra")) return "cobra";
-  if (snake.includes("Krait")) return "krait";
-  if (snake.includes("Russell")) return "russells";
-  if (snake.includes("Saw")) return "sawscaled";
-  return "unknown";
-}
-
-function formatTime(timestamp) {
-  if (!timestamp) return "—";
-  const d = new Date(timestamp);
-  if (isNaN(d.getTime())) return timestamp;
-  return d.toLocaleString("en-IN", {
-    day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
-  });
-}
-
-function maskContact(contact) {
-  if (!contact) return "—";
-  return contact.replace(/(\+?\d{2,3})(\d+)(\d{4})/, "$1****$3");
-}
-
-async function loadStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    document.getElementById('backend-status').textContent =
-      `Database: ${data.database_backend}  ·  Hospital alerts: ${data.notification_backend}`;
-  } catch (e) {
-    document.getElementById('backend-status').textContent = 'Could not reach backend.';
-  }
-}
-
-async function loadCases() {
-  try {
-    const res = await fetch('/api/cases?limit=50');
-    const data = await res.json();
-    const cases = data.cases || [];
-
-    document.getElementById("total").textContent = cases.length;
-    document.getElementById("whatsapp").textContent =
-      cases.filter(c => c.channel === "whatsapp").length;
-    document.getElementById("ivr").textContent =
-      cases.filter(c => c.channel === "ivr" || c.channel === "ivr-sim").length;
-
-    const tbody = document.getElementById("cases-body");
-
-    if (cases.length === 0) {
-      tbody.innerHTML = `
-        <tr><td colspan="4" class="loading">
-          No cases yet. Open the simulator (link below) or message
-          your WhatsApp sandbox number to create one.
-        </td></tr>`;
-      return;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AHIVACH :: Emergency Snakebite Response Cell — Case Register</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    tbody.innerHTML = cases.map(c => `
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: Verdana, Geneva, Arial, sans-serif;
+      background: #EFEAD8;
+      color: #1A1A1A;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+
+    a {
+      color: #0B3D62;
+    }
+
+    a:visited {
+      color: #5A3D7A;
+    }
+
+    /* ── Skip / utility bar ─────────────────────────────── */
+    .utility-bar {
+      background: #1A1A1A;
+      color: #D8D2BE;
+      font-size: 0.6875rem;
+      padding: 4px 12px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .utility-bar a {
+      color: #D8D2BE;
+      text-decoration: none;
+      margin-right: 10px;
+    }
+
+    .utility-bar a:hover {
+      text-decoration: underline;
+      color: #fff;
+    }
+
+    .font-controls span {
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+      border: 1px solid #555;
+      margin-left: 3px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      font-weight: bold;
+    }
+
+    .font-controls span:hover {
+      background: #333;
+    }
+
+    /* ── Tricolor strip ─────────────────────────────────── */
+    .tricolor {
+      height: 4px;
+      display: flex;
+    }
+
+    .tricolor div {
+      flex: 1;
+    }
+
+    .tricolor .saffron {
+      background: #FF9933;
+    }
+
+    .tricolor .white {
+      background: #F5F5F5;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .tricolor .green {
+      background: #138808;
+    }
+
+    /* ── Letterhead ──────────────────────────────────────── */
+    .letterhead {
+      background: #FBF9F1;
+      border-bottom: 3px double #0B3D62;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .seal {
+      flex-shrink: 0;
+    }
+
+    .letterhead-text {
+      flex: 1;
+      text-align: center;
+    }
+
+    .letterhead-text .dept-en {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1.15rem;
+      color: #0B3D62;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .letterhead-text .dept-kn {
+      font-size: 0.75rem;
+      color: #5A5238;
+      margin-top: 1px;
+    }
+
+    .letterhead-text .cell-name {
+      font-family: Georgia, serif;
+      font-size: 0.8125rem;
+      color: #8B1A1A;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    .file-ref {
+      flex-shrink: 0;
+      text-align: right;
+      font-family: 'Courier New', monospace;
+      font-size: 0.6875rem;
+      color: #5A5238;
+      line-height: 1.6;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────── */
+    .gov-nav {
+      background: #0B3D62;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .gov-nav a {
+      color: #E9E4D4;
+      text-decoration: none;
+      padding: 9px 16px;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+      border-right: 1px solid #16537A;
+    }
+
+    .gov-nav a:visited {
+      color: #E9E4D4;
+    }
+
+    .gov-nav a.active {
+      background: #8B1A1A;
+      color: #fff;
+    }
+
+    .gov-nav a:hover:not(.active) {
+      background: #16537A;
+    }
+
+    /* ── Ticker ──────────────────────────────────────────── */
+    .ticker-wrap {
+      background: #B8860B;
+      color: #2A1E00;
+      overflow: hidden;
+      white-space: nowrap;
+      border-bottom: 1px solid #8B1A1A;
+      border-top: 1px solid #8B1A1A;
+    }
+
+    .ticker {
+      display: inline-block;
+      padding-left: 100%;
+      font-weight: bold;
+      font-size: 0.75rem;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      animation: ticker 26s linear infinite;
+    }
+
+    @keyframes ticker {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker {
+        animation: none;
+        padding-left: 12px;
+      }
+    }
+
+    /* ── Main ────────────────────────────────────────────── */
+    main {
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0 16px 40px;
+    }
+
+    .breadcrumb {
+      font-size: 0.6875rem;
+      color: #5A5238;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      font-family: Georgia, serif;
+      font-size: 1rem;
+      color: #0B3D62;
+      border-bottom: 2px solid #0B3D62;
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .panel-title .status-line {
+      font-family: Verdana, sans-serif;
+      font-size: 0.6875rem;
+      font-weight: normal;
+      color: #5A5238;
+    }
+
+    /* ── Ledger stat boxes ───────────────────────────────── */
+    .ledger {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .ledger-box {
+      background: #FBF9F1;
+      border: 1px solid #B8AF8F;
+      box-shadow: inset 0 0 0 1px #fff, 2px 2px 4px rgba(0, 0, 0, 0.08);
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .ledger-box .n {
+      font-family: Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: bold;
+      color: #8B1A1A;
+    }
+
+    .ledger-box .lbl {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5A5238;
+      margin-top: 2px;
+    }
+
+    .btn-gov {
+      background: linear-gradient(#F3EFE2, #D6CDAE);
+      border: 2px outset #B8AF8F;
+      padding: 6px 14px;
+      font-family: Verdana, sans-serif;
+      font-size: 0.6875rem;
+      font-weight: bold;
+      color: #1A1A1A;
+      cursor: pointer;
+    }
+
+    .btn-gov:active {
+      border-style: inset;
+    }
+
+    /* ── Register table ──────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #FBF9F1;
+      border: 1px solid #8A8370;
+      margin-bottom: 26px;
+    }
+
+    th {
+      background: #0B3D62;
+      color: #fff;
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-family: Georgia, serif;
+      border-right: 1px solid #16537A;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #DDD6C0;
+      border-right: 1px solid #E8E2CC;
+      font-size: 0.75rem;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #F4F0E1;
+    }
+
+    .file-no {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6875rem;
+      color: #5A5238;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 0.625rem;
+      font-weight: bold;
+      letter-spacing: 0.3px;
+      border: 1px solid;
+      text-transform: uppercase;
+      background: #fff;
+    }
+
+    .cobra {
+      color: #6C1E85;
+      border-color: #6C1E85;
+    }
+
+    .krait {
+      color: #2C3E50;
+      border-color: #2C3E50;
+    }
+
+    .russells {
+      color: #8B1A1A;
+      border-color: #8B1A1A;
+    }
+
+    .sawscaled {
+      color: #A05A00;
+      border-color: #A05A00;
+    }
+
+    .unknown {
+      color: #5A5238;
+      border-color: #5A5238;
+    }
+
+    .channel-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 0.625rem;
+      background: #E4EEF5;
+      color: #0B3D62;
+      border: 1px solid #A9C6DA;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 26px;
+      color: #5A5238;
+      font-style: italic;
+    }
+
+    /* ── Correspondence / alerts ─────────────────────────── */
+    .letter-card {
+      background: #FBF9F1;
+      border: 1px solid #8A8370;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      position: relative;
+      font-size: 0.75rem;
+      white-space: pre-wrap;
+      line-height: 1.55;
+    }
+
+    .letter-card .meta {
+      font-family: 'Courier New', monospace;
+      font-size: 0.6875rem;
+      color: #5A5238;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #B8AF8F;
+      padding-bottom: 6px;
+    }
+
+    .stamp {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      border: 2px solid;
+      padding: 3px 8px;
+      font-family: Georgia, serif;
+      font-weight: bold;
+      font-size: 0.6875rem;
+      letter-spacing: 1px;
+      transform: rotate(-6deg);
+      opacity: 0.85;
+    }
+
+    .stamp.sent {
+      color: #138808;
+      border-color: #138808;
+    }
+
+    .stamp.logged {
+      color: #B8860B;
+      border-color: #B8860B;
+    }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer {
+      background: #0B3D62;
+      color: #C9C2A6;
+      font-size: 0.6875rem;
+      padding: 18px 16px 22px;
+      margin-top: 30px;
+    }
+
+    footer .foot-inner {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    footer .foot-links {
+      margin-bottom: 10px;
+    }
+
+    footer .foot-links a {
+      color: #C9C2A6;
+      margin-right: 14px;
+      text-decoration: none;
+    }
+
+    footer .foot-links a:hover {
+      text-decoration: underline;
+      color: #fff;
+    }
+
+    footer .disclaimer {
+      color: #8FA3B5;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    footer .meta-row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid #16537A;
+      padding-top: 10px;
+    }
+
+    .odometer {
+      display: inline-flex;
+      gap: 1px;
+      margin-left: 4px;
+    }
+
+    .odometer span {
+      background: #1A1A1A;
+      color: #B8FFB8;
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      padding: 1px 3px;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="utility-bar">
+    <div>
+      <a href="#main-content">Skip to Main Content</a>
+      <a href="#"
+        onclick="alert('Screen reader access via your browser/OS assistive technology settings.'); return false;">Screen
+        Reader Access</a>
+    </div>
+    <div class="font-controls">
+      Text Size:
+      <span onclick="setFontSize(-1)">A-</span><span onclick="setFontSize(0)">A</span><span
+        onclick="setFontSize(1)">A+</span>
+    </div>
+  </div>
+
+  <div class="tricolor">
+    <div class="saffron"></div>
+    <div class="white"></div>
+    <div class="green"></div>
+  </div>
+
+  <div class="letterhead">
+    <div class="seal">
+      <svg viewBox="0 0 120 120" width="58" height="58">
+        <defs>
+          <path id="sealring" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" />
+        </defs>
+        <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2" />
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1" />
+        <text font-size="6.3" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
+          <textPath href="#sealring" startOffset="1%">EMERGENCY SNAKEBITE RESPONSE CELL &#8226; GOVT. OF KARNATAKA
+            &#8226;</textPath>
+        </text>
+        <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
+        <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A"
+          font-weight="bold">AHIVACH</text>
+        <text x="60" y="85" text-anchor="middle" font-size="5.5" font-family="Verdana, sans-serif" fill="#5A5238">EST.
+          2026</text>
+      </svg>
+    </div>
+    <div class="letterhead-text">
+      <div class="dept-en">DEPARTMENT OF HEALTH &amp; FAMILY WELFARE</div>
+      <div class="dept-kn">ಆರೋಗ್ಯ ಮತ್ತು ಕುಟುಂಬ ಕಲ್ಯಾಣ ಇಲಾಖೆ &nbsp;·&nbsp; GOVERNMENT OF KARNATAKA</div>
+      <div class="cell-name">AHIVACH — Emergency Snakebite Response Cell</div>
+    </div>
+    <div class="file-ref">
+      CIRCULAR NO: ESRC/2026/DASH<br>
+      STATUS: <span id="header-status-word">LOADING</span>
+    </div>
+  </div>
+
+  <nav class="gov-nav">
+    <a href="/">HOME</a>
+    <a href="#" class="active">LIVE CASE REGISTER</a>
+    <a href="#alerts-section">HOSPITAL CORRESPONDENCE</a>
+    <a href="/simulator">FILE A TEST CASE</a>
+    <a href="/whatsapp-demo">WHATSAPP CHANNEL DEMO</a>
+  </nav>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      ⚠ 24×7 EMERGENCY HELPLINE ACTIVE &nbsp;&nbsp;&#8226;&nbsp;&nbsp; ALL PATIENTS RECEIVE POLYVALENT ANTIVENOM
+      REGARDLESS OF SPECIES &nbsp;&nbsp;&#8226;&nbsp;&nbsp; DO NOT CUT THE WOUND, DO NOT APPLY A TOURNIQUET, DO NOT
+      ATTEMPT TO SUCK VENOM &nbsp;&nbsp;&#8226;&nbsp;&nbsp; NEAREST IS NOT ALWAYS BEST — GO TO A CENTRE THAT STOCKS ASV
+      &nbsp;&nbsp;&#8226;&nbsp;&nbsp; THIS PANEL REFRESHES AUTOMATICALLY EVERY 10 SECONDS
+      &nbsp;&nbsp;&#8226;&nbsp;&nbsp;
+    </div>
+  </div>
+
+  <main id="main-content">
+    <div class="breadcrumb">Home &nbsp;›&nbsp; Emergency Response &nbsp;›&nbsp; <b>Live Case Register</b></div>
+
+    <div class="panel-title">
+      <span>SUMMARY OF RETURNS</span>
+      <span class="status-line" id="backend-status">Loading backend info...</span>
+    </div>
+
+    <div class="ledger">
+      <div class="ledger-box">
+        <div class="n" id="total">—</div>
+        <div class="lbl">Total Cases Filed</div>
+      </div>
+      <div class="ledger-box">
+        <div class="n" id="whatsapp">—</div>
+        <div class="lbl">Via WhatsApp Channel</div>
+      </div>
+      <div class="ledger-box">
+        <div class="n" id="ivr">—</div>
+        <div class="lbl">Via Voice / IVR Channel</div>
+      </div>
+    </div>
+
+    <div class="panel-title">
+      <span>REGISTER OF CASES — LIVE ENTRIES</span>
+      <button class="btn-gov" onclick="loadCases()">⟳ Refresh Register</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>File No.</th>
+          <th>Date &amp; Time</th>
+          <th>Channel</th>
+          <th>Probable Species</th>
+          <th>Reporting Contact</th>
+        </tr>
+      </thead>
+      <tbody id="cases-body">
+        <tr>
+          <td colspan="5" class="loading">Loading register…</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="panel-title" id="alerts-section">
+      <span>OUTGOING HOSPITAL CORRESPONDENCE LOG</span>
+    </div>
+    <div id="alerts-list"></div>
+
+  </main>
+
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-links">
+        <a href="/">Home</a>
+        <a href="/simulator">File a Test Case</a>
+        <a href="/whatsapp-demo">WhatsApp Channel Demo</a>
+        <a href="#" onclick="return false;">Right to Information</a>
+        <a href="#" onclick="return false;">Feedback / Grievance</a>
+      </div>
+      <div class="disclaimer">
+        This is a demonstration system built for a public-health hackathon (Bengaluru, August 2026).
+        It is not an operational Government of Karnataka service. All hospital names shown are real
+        institutions known to stock polyvalent antivenom, referenced for demonstration accuracy only.
+        Content owned and maintained by Team AHIVACH. Designed &amp; developed for the AHIVACH project.
+      </div>
+      <div class="meta-row">
+        <div>Site last updated: <span id="last-updated">—</span></div>
+        <div>Visitors: <span class="odometer" id="visitor-count"></span></div>
+        <div>Best viewed at 1024×768 and above</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Accessibility: working font-size toolbar ──────────────
+    let fontStep = 0;
+    function setFontSize(delta) {
+      fontStep = delta === 0 ? 0 : Math.max(-2, Math.min(3, fontStep + delta));
+      document.documentElement.style.fontSize = (16 + fontStep * 1.5) + 'px';
+    }
+
+    // ── Visitor counter (cosmetic, local only) ────────────────
+    function renderOdometer() {
+      let n = parseInt(localStorage.getItem('ahivach_visits') || '104213', 10) + 1;
+      localStorage.setItem('ahivach_visits', n);
+      const digits = String(n).padStart(7, '0').split('');
+      document.getElementById('visitor-count').innerHTML =
+        digits.map(d => `<span>${d}</span>`).join('');
+    }
+    renderOdometer();
+    document.getElementById('last-updated').textContent =
+      new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    // ── Data logic (unchanged from original) ──────────────────
+    function getSnakeClass(snake) {
+      if (!snake) return "unknown";
+      if (snake.includes("Cobra")) return "cobra";
+      if (snake.includes("Krait")) return "krait";
+      if (snake.includes("Russell")) return "russells";
+      if (snake.includes("Saw")) return "sawscaled";
+      return "unknown";
+    }
+
+    function formatTime(timestamp) {
+      if (!timestamp) return "—";
+      const d = new Date(timestamp);
+      if (isNaN(d.getTime())) return timestamp;
+      return d.toLocaleString("en-IN", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function maskContact(contact) {
+      if (!contact) return "—";
+      return contact.replace(/(\+?\d{2,3})(\d+)(\d{4})/, "$1****$3");
+    }
+
+    function fileNumber(c, index) {
+      const raw = (c.id || '').replace(/-/g, '').toUpperCase();
+      const suffix = raw ? raw.slice(0, 6) : String(index).padStart(6, '0');
+      return `AHIVACH/2026/KA/${suffix}`;
+    }
+
+    async function loadStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        document.getElementById('backend-status').textContent =
+          `Database: ${data.database_backend}  ·  Hospital alerts: ${data.notification_backend}`;
+        document.getElementById('header-status-word').textContent = 'LIVE';
+      } catch (e) {
+        document.getElementById('backend-status').textContent = 'Could not reach backend.';
+        document.getElementById('header-status-word').textContent = 'OFFLINE';
+      }
+    }
+
+    async function loadCases() {
+      try {
+        const res = await fetch('/api/cases?limit=50');
+        const data = await res.json();
+        const cases = data.cases || [];
+
+        document.getElementById("total").textContent = cases.length;
+        document.getElementById("whatsapp").textContent =
+          cases.filter(c => c.channel === "whatsapp").length;
+        document.getElementById("ivr").textContent =
+          cases.filter(c => c.channel === "ivr" || c.channel === "ivr-sim").length;
+
+        const tbody = document.getElementById("cases-body");
+
+        if (cases.length === 0) {
+          tbody.innerHTML = `
+        <tr><td colspan="5" class="loading">
+          No cases filed yet. Use "File a Test Case" or the WhatsApp Channel Demo
+          above to generate a register entry.
+        </td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = cases.map((c, i) => `
       <tr>
+        <td class="file-no">${fileNumber(c, i)}</td>
         <td>${formatTime(c.created_at)}</td>
-        <td><span class="channel-badge">${
-          c.channel === "whatsapp" ? "📱 WhatsApp" :
-          c.channel === "web" ? "💬 Web Sim" :
-          c.channel === "ivr-sim" ? "📞 Call Sim" : "📞 IVR Call"
-        }</span></td>
-        <td><span class="snake-badge ${getSnakeClass(c.snake_identified)}">${c.snake_identified || "Unknown"}</span></td>
+        <td><span class="channel-tag">${c.channel === "whatsapp" ? "WHATSAPP" :
+            c.channel === "web" ? "WEB PORTAL" :
+              c.channel === "ivr-sim" ? "VOICE (SIM)" : "VOICE / IVR"
+          }</span></td>
+        <td><span class="tag ${getSnakeClass(c.snake_identified)}">${c.snake_identified || "Unknown"}</span></td>
         <td>${maskContact(c.patient_contact)}</td>
       </tr>
     `).join("");
 
-  } catch (error) {
-    document.getElementById("cases-body").innerHTML = `
-      <tr><td colspan="4" class="loading">Error loading cases: ${error}</td></tr>`;
-    console.error(error);
-  }
-}
-
-async function loadAlerts() {
-  try {
-    const res = await fetch('/api/alerts?limit=10');
-    const data = await res.json();
-    const alerts = data.alerts || [];
-    const container = document.getElementById('alerts-list');
-
-    if (alerts.length === 0) {
-      container.innerHTML = '<p class="loading">No alerts fired yet — run a test case in the simulator.</p>';
-      return;
+      } catch (error) {
+        document.getElementById("cases-body").innerHTML = `
+      <tr><td colspan="5" class="loading">Error loading register: ${error}</td></tr>`;
+        console.error(error);
+      }
     }
 
-    container.innerHTML = alerts.map(a => `
-      <div class="alert-card">
-        <div class="meta">
-          ${formatTime(a.created_at)} · ${a.channel}
-          <span class="alert-sent-badge ${a.sent_via_sms ? 'sms' : 'logged'}">
-            ${a.sent_via_sms ? '✓ SMS SENT' : 'LOGGED (no SMS provider configured)'}
-          </span>
-        </div>
+    async function loadAlerts() {
+      try {
+        const res = await fetch('/api/alerts?limit=10');
+        const data = await res.json();
+        const alerts = data.alerts || [];
+        const container = document.getElementById('alerts-list');
+
+        if (alerts.length === 0) {
+          container.innerHTML = '<p class="loading">No correspondence issued yet — file a test case to generate a hospital alert.</p>';
+          return;
+        }
+
+        container.innerHTML = alerts.map(a => `
+      <div class="letter-card">
+        <span class="stamp ${a.sent_via_sms ? 'sent' : 'logged'}">
+          ${a.sent_via_sms ? 'SENT · SMS' : 'LOGGED ONLY'}
+        </span>
+        <div class="meta">REF: ${formatTime(a.created_at)} &nbsp;·&nbsp; CHANNEL: ${(a.channel || '').toUpperCase()}</div>
         ${a.message}
       </div>
     `).join("");
-  } catch (error) {
-    document.getElementById('alerts-list').innerHTML =
-      `<p class="loading">Error loading alerts: ${error}</p>`;
-  }
-}
+      } catch (error) {
+        document.getElementById('alerts-list').innerHTML =
+          `<p class="loading">Error loading correspondence log: ${error}</p>`;
+      }
+    }
 
-loadStatus();
-loadCases();
-loadAlerts();
-setInterval(loadCases, 10000);
-setInterval(loadAlerts, 10000);
-</script>
+    loadStatus();
+    loadCases();
+    loadAlerts();
+    setInterval(loadCases, 10000);
+    setInterval(loadAlerts, 10000);
+    setInterval(loadStatus, 10000);
+  </script>
 </body>
+
 </html>
