@@ -20,28 +20,8 @@
   a { color: #0B3D62; }
   a:visited { color: #5A3D7A; }
 
-  /* ── Skip / utility bar ─────────────────────────────── */
-  .utility-bar {
-    background: #1A1A1A;
-    color: #D8D2BE;
-    font-size: 0.6875rem;
-    padding: 4px 12px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .utility-bar a { color: #D8D2BE; text-decoration: none; margin-right: 10px; }
-  .utility-bar a:hover { text-decoration: underline; color: #fff; }
-  .font-controls span {
-    display: inline-block; width: 20px; text-align: center;
-    border: 1px solid #555; margin-left: 3px; cursor: pointer;
-    font-family: Georgia, serif; font-weight: bold;
-  }
-  .font-controls span:hover { background: #333; }
-
-  /* ── Letterhead ──────────────────────────────────────── */
-  .letterhead {
+  /* ── Header ──────────────────────────────────────────── */
+  .app-header {
     background: #FBF9F1;
     border-bottom: 3px double #0B3D62;
     padding: 14px 20px;
@@ -50,19 +30,14 @@
     gap: 16px;
     flex-wrap: wrap;
   }
-  @media (max-width: 600px) {
-    .letterhead { flex-direction: column; text-align: center; gap: 8px; }
-  }
-  .seal { flex-shrink: 0; }
-  .letterhead-text { flex: 1; text-align: center; }
-  .letterhead-text .dept-en {
+  .app-header .title {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 1.15rem;
     color: #0B3D62;
     font-weight: bold;
     letter-spacing: 0.5px;
   }
-  .letterhead-text .cell-name {
+  .app-header .subtitle {
     font-family: Georgia, serif;
     font-size: 0.8125rem;
     color: #8B1A1A;
@@ -70,7 +45,7 @@
     font-style: italic;
   }
   .file-ref {
-    flex-shrink: 0;
+    margin-left: auto;
     text-align: right;
     font-family: 'Courier New', monospace;
     font-size: 0.6875rem;
@@ -78,7 +53,8 @@
     line-height: 1.6;
   }
   @media (max-width: 600px) {
-    .file-ref { text-align: center; }
+    .app-header { flex-direction: column; text-align: center; gap: 8px; }
+    .file-ref { margin-left: 0; text-align: center; }
   }
 
   /* ── Nav ─────────────────────────────────────────────── */
@@ -122,18 +98,9 @@
     0% { transform: translateX(0); }
     100% { transform: translateX(-100%); }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ticker { animation: none; padding-left: 12px; }
-  }
 
   /* ── Main ────────────────────────────────────────────── */
   main { max-width: 1100px; margin: 18px auto; padding: 0 16px 40px; }
-
-  .breadcrumb {
-    font-size: 0.6875rem;
-    color: #5A5238;
-    margin-bottom: 14px;
-  }
 
   .panel-title {
     font-family: Georgia, serif;
@@ -281,10 +248,11 @@
     background: #FBF9F1; font-family: Verdana, sans-serif;
   }
 
-  .row-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .row-actions { display: flex; gap: 4px; flex-direction: column; align-items: stretch; }
   .row-actions button {
-    font-size: 0.625rem; padding: 3px 6px; background: #F3EFE2;
+    font-size: 0.625rem; padding: 5px 6px; background: #F3EFE2;
     border: 1px outset #B8AF8F; cursor: pointer; white-space: nowrap;
+    width: 100%;
   }
   .row-actions button:hover { background: #E8E2CC; }
   .row-actions button:disabled { opacity: 0.4; cursor: default; }
@@ -351,50 +319,14 @@
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
     border-top: 1px solid #16537A; padding-top: 10px;
   }
-  .odometer {
-    display: inline-flex; gap: 1px; margin-left: 4px;
-  }
-  .odometer span {
-    background: #1A1A1A; color: #B8FFB8;
-    font-family: 'Courier New', monospace;
-    font-size: 0.75rem;
-    padding: 1px 3px;
-    border: 1px solid #333;
-  }
 </style>
 </head>
 <body>
 
-<div class="utility-bar">
+<div class="app-header">
   <div>
-    <a href="#main-content">Skip to Main Content</a>
-    <a href="#" onclick="alert('Screen reader access via your browser/OS assistive technology settings.'); return false;">Screen Reader Access</a>
-  </div>
-  <div class="font-controls">
-    Text Size:
-    <span onclick="setFontSize(-1)">A-</span><span onclick="setFontSize(0)">A</span><span onclick="setFontSize(1)">A+</span>
-  </div>
-</div>
-
-<div class="letterhead">
-  <div class="seal">
-    <svg viewBox="0 0 120 120" width="58" height="58">
-      <defs>
-        <path id="sealring" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" />
-      </defs>
-      <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
-      <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
-      <text font-size="7" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
-        <textPath href="#sealring" startOffset="11%">EMERGENCY SNAKEBITE RESPONSE NETWORK</textPath>
-      </text>
-      <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
-      <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
-      <text x="60" y="85" text-anchor="middle" font-size="5.5" font-family="Verdana, sans-serif" fill="#5A5238">EST. 2026</text>
-    </svg>
-  </div>
-  <div class="letterhead-text">
-    <div class="dept-en">AHIVACH</div>
-    <div class="cell-name">Emergency Snakebite Response Network</div>
+    <div class="title">AHIVACH</div>
+    <div class="subtitle">Emergency Snakebite Response Network</div>
   </div>
   <div class="file-ref">
     FILE NO: ESRC/2026/DASH<br>
@@ -403,11 +335,9 @@
 </div>
 
 <nav class="gov-nav">
-  <a href="/" class="active">HOME</a>
-  <a href="#" class="active">LIVE CASE REGISTER</a>
+  <a href="/dashboard" class="active">LIVE CASE REGISTER</a>
   <a href="#alerts-section">HOSPITAL CORRESPONDENCE</a>
   <a href="/prevention">PREVENTION</a>
-  <a href="/simulator">FILE A TEST CASE</a>
   <a href="/emergency-card">EMERGENCY CARD</a>
 </nav>
 
@@ -418,8 +348,6 @@
 </div>
 
 <main id="main-content">
-  <div class="breadcrumb">Home &nbsp;›&nbsp; Emergency Response &nbsp;›&nbsp; <b>Live Case Register</b></div>
-
   <div class="panel-title">
     <span>SUMMARY OF RETURNS</span>
   </div>
@@ -457,39 +385,20 @@
 <footer>
   <div class="foot-inner">
     <div class="foot-links">
-      <a href="/">Home</a>
-      <a href="/simulator">File a Test Case</a>
-      <a href="#" onclick="return false;">Right to Information</a>
-      <a href="#" onclick="return false;">Feedback / Grievance</a>
+      <a href="/dashboard">Live Case Register</a>
+      <a href="/prevention">Prevention</a>
+      <a href="/emergency-card">Emergency Card</a>
     </div>
     <div class="disclaimer">
       AHIVACH Emergency Snakebite Response Network. All hospital names shown are known to stock polyvalent antivenom. Designed &amp; developed for the AHIVACH project.
     </div>
     <div class="meta-row">
       <div>Site last updated: <span id="last-updated">—</span></div>
-      <div>Visitors: <span class="odometer" id="visitor-count"></span></div>
-      <div>Best viewed at 1024×768 and above</div>
     </div>
   </div>
 </footer>
 
 <script>
-// ── Accessibility: working font-size toolbar ──────────────
-let fontStep = 0;
-function setFontSize(delta) {
-  fontStep = delta === 0 ? 0 : Math.max(-2, Math.min(3, fontStep + delta));
-  document.documentElement.style.fontSize = (16 + fontStep * 1.5) + 'px';
-}
-
-// ── Visitor counter (cosmetic, local only) ────────────────
-function renderOdometer() {
-  let n = parseInt(localStorage.getItem('ahivach_visits') || '104213', 10) + 1;
-  localStorage.setItem('ahivach_visits', n);
-  const digits = String(n).padStart(7, '0').split('');
-  document.getElementById('visitor-count').innerHTML =
-    digits.map(d => `<span>${d}</span>`).join('');
-}
-renderOdometer();
 document.getElementById('last-updated').textContent =
   new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 

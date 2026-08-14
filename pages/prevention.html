@@ -20,49 +20,41 @@
   a { color: #0B3D62; }
   a:visited { color: #5A3D7A; }
 
-  .utility-bar {
-    background: #1A1A1A; color: #D8D2BE; font-size: 0.6875rem;
-    padding: 4px 12px; display: flex; justify-content: space-between;
-    flex-wrap: wrap; gap: 6px;
+  /* ── Header ──────────────────────────────────────────── */
+  .app-header {
+    background: #FBF9F1;
+    border-bottom: 3px double #0B3D62;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
   }
-  .utility-bar a { color: #D8D2BE; text-decoration: none; margin-right: 10px; }
-  .utility-bar a:hover { text-decoration: underline; color: #fff; }
-  .font-controls span {
-    display: inline-block; width: 20px; text-align: center;
-    border: 1px solid #555; margin-left: 3px; cursor: pointer;
-    font-family: Georgia, serif; font-weight: bold;
+  .app-header .title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.15rem;
+    color: #0B3D62;
+    font-weight: bold;
+    letter-spacing: 0.5px;
   }
-  .font-controls span:hover { background: #333; }
-
-  .tricolor { height: 4px; display: flex; }
-  .tricolor div { flex: 1; }
-  .tricolor .saffron { background: #FF9933; }
-  .tricolor .white { background: #F5F5F5; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-  .tricolor .green { background: #138808; }
-
-  .letterhead {
-    background: #FBF9F1; border-bottom: 3px double #0B3D62; padding: 14px 20px;
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  }
-  @media (max-width: 600px) {
-    .letterhead { flex-direction: column; text-align: center; gap: 8px; }
-  }
-  .seal { flex-shrink: 0; }
-  .letterhead-text { flex: 1; text-align: center; }
-  .letterhead-text .dept-en {
-    font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem;
-    color: #0B3D62; font-weight: bold; letter-spacing: 0.5px;
-  }
-  .letterhead-text .cell-name {
-    font-family: Georgia, serif; font-size: 0.8125rem; color: #8B1A1A;
-    margin-top: 5px; font-style: italic;
+  .app-header .subtitle {
+    font-family: Georgia, serif;
+    font-size: 0.8125rem;
+    color: #8B1A1A;
+    margin-top: 5px;
+    font-style: italic;
   }
   .file-ref {
-    flex-shrink: 0; text-align: right; font-family: 'Courier New', monospace;
-    font-size: 0.6875rem; color: #5A5238; line-height: 1.6;
+    margin-left: auto;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-size: 0.6875rem;
+    color: #5A5238;
+    line-height: 1.6;
   }
   @media (max-width: 600px) {
-    .file-ref { text-align: center; }
+    .app-header { flex-direction: column; text-align: center; gap: 8px; }
+    .file-ref { margin-left: 0; text-align: center; }
   }
 
   .gov-nav { background: #0B3D62; display: flex; flex-wrap: wrap; }
@@ -74,8 +66,12 @@
   .gov-nav a.active { background: #8B1A1A; color: #fff; }
   .gov-nav a:hover:not(.active) { background: #16537A; }
 
-  main { max-width: 860px; margin: 18px auto; padding: 0 16px 40px; }
-  .breadcrumb { font-size: 0.6875rem; color: #5A5238; margin-bottom: 14px; }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  main { max-width: 900px; margin: 18px auto; padding: 0 16px 40px; }
 
   .panel-title {
     font-family: Georgia, serif; font-size: 1rem; color: #0B3D62;
@@ -145,54 +141,33 @@
   footer .foot-links a { color: #C9C2A6; margin-right: 14px; text-decoration: none; }
   footer .foot-links a:hover { text-decoration: underline; color: #fff; }
   footer .disclaimer { color: #8FA3B5; line-height: 1.6; }
+  footer .meta-row {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    border-top: 1px solid #16537A; padding-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<div class="utility-bar">
+<div class="app-header">
   <div>
-    <a href="#main-content">Skip to Main Content</a>
-    <a href="#" onclick="alert('Screen reader access via your browser/OS assistive technology settings.'); return false;">Screen Reader Access</a>
-  </div>
-  <div class="font-controls">
-    Text Size:
-    <span onclick="setFontSize(-1)">A-</span><span onclick="setFontSize(0)">A</span><span onclick="setFontSize(1)">A+</span>
-  </div>
-</div>
-
-<div class="letterhead">
-  <div class="seal">
-    <svg viewBox="0 0 120 120" width="58" height="58">
-      <defs><path id="sealring3" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" /></defs>
-      <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
-      <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
-      <text font-size="7" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
-        <textPath href="#sealring3" startOffset="11%">EMERGENCY SNAKEBITE RESPONSE NETWORK</textPath>
-      </text>
-      <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
-      <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
-      <text x="60" y="85" text-anchor="middle" font-size="5.5" font-family="Verdana, sans-serif" fill="#5A5238">EST. 2026</text>
-    </svg>
-  </div>
-  <div class="letterhead-text">
-    <div class="dept-en">AHIVACH</div>
-    <div class="cell-name">Prevention &amp; Community Awareness</div>
+    <div class="title">AHIVACH</div>
+    <div class="subtitle">Emergency Snakebite Response Network</div>
   </div>
   <div class="file-ref">FILE NO: ESRC/2026/PREV<br>MODE: LIVE</div>
 </div>
 
 <nav class="gov-nav">
-  <a href="/">HOME</a>
   <a href="/dashboard">LIVE CASE REGISTER</a>
-  <a href="#" class="active">PREVENTION</a>
-  <a href="/simulator">FILE A TEST CASE</a>
+  <a href="/dashboard#alerts-section">HOSPITAL CORRESPONDENCE</a>
+  <a href="/prevention" class="active">PREVENTION</a>
   <a href="/emergency-card">EMERGENCY CARD</a>
 </nav>
 
-<main id="main-content">
-  <div class="breadcrumb">Home &nbsp;›&nbsp; Emergency Response &nbsp;›&nbsp; <b>Prevention</b></div>
+<div class="ticker-wrap"></div>
 
-  <div class="panel-title">SEASONAL RISK STATUS</div>
+<main id="main-content">
+  <div class="risk-banner" id="banner">SEASONAL RISK STATUS</div>
   <div class="risk-banner" id="risk-banner">
     Loading seasonal risk assessment…
   </div>
@@ -242,9 +217,8 @@
 <footer>
   <div class="foot-inner">
     <div class="foot-links">
-      <a href="/">Home</a>
       <a href="/dashboard">Live Case Register</a>
-      <a href="/simulator">File a Test Case</a>
+      <a href="/prevention">Prevention</a>
       <a href="/emergency-card">Emergency Card</a>
     </div>
     <div class="disclaimer">
@@ -254,14 +228,6 @@
 </footer>
 
 <script>
-let fontStep = 0;
-function setFontSize(delta) {
-  fontStep = delta === 0 ? 0 : Math.max(-2, Math.min(3, fontStep + delta));
-  document.documentElement.style.fontSize = (16 + fontStep * 1.5) + 'px';
-}
-
-// Simple seasonal banner — Karnataka snake activity is elevated in the monsoon/post-monsoon
-// window (roughly June–November) when flooding and harvest activity increase human-snake contact.
 function renderRiskBanner() {
   const month = new Date().getMonth(); // 0=Jan
   const el = document.getElementById('risk-banner');

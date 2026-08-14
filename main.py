@@ -161,12 +161,8 @@ def icon_file(filename: str):
     return FileResponse(path)
 
 
-# ── HEALTH CHECK ─────────────────────────────────────────
+# ── ROUTING ──────────────────────────────────────────────
 @app.get("/")
 def home():
-    return {
-        "status": "AHIVACH is running",
-        "systems": ["WhatsApp Bot", "IVR Bot", "Web Simulator"],
-        "try": ["/simulator", "/dashboard", "/prevention", "/emergency-card"],
-        "version": "1.2",
-    }
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/dashboard")

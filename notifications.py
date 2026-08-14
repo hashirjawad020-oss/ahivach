@@ -7,17 +7,14 @@
 # they'd all just implement send_hospital_alert().
 
 import os
-import json
 from datetime import datetime, timezone
 from pathlib import Path
 from dotenv import load_dotenv
 
 from core import build_hospital_message
+import database
 
 load_dotenv()
-
-DATA_DIR = Path(__file__).parent / "data"
-ALERTS_LOG_FILE = DATA_DIR / "hospital_alerts.json"
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
@@ -37,25 +34,6 @@ if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_SENDER_NUMBER and HOSPITA
               f"falling back to local log: {e}")
 
 
-def _log_locally(message, snake, patient_contact, channel, sent):
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    alerts = []
-    if ALERTS_LOG_FILE.exists():
-        try:
-            alerts = json.loads(ALERTS_LOG_FILE.read_text())
-        except json.JSONDecodeError:
-            alerts = []
-    alerts.append({
-        "snake": snake,
-        "patient_contact": patient_contact,
-        "channel": channel,
-        "message": message,
-        "sent_via_sms": sent,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
-    ALERTS_LOG_FILE.write_text(json.dumps(alerts, indent=2))
-
-
 def send_hospital_alert(snake, patient_contact, channel):
     """
     Fires a hospital alert. Returns True/False. Never raises —
@@ -71,28 +49,21 @@ def send_hospital_alert(snake, patient_contact, channel):
                 to=HOSPITAL_PHONE_NUMBER,
             )
             print(f"[notifications] SMS sent to hospital for {snake}")
-            _log_locally(message, snake, patient_contact, channel, sent=True)
+            database.log_alert(snake, patient_contact, channel, message, sent_via_sms=True)
             return True
         except Exception as e:
             print(f"[notifications] Twilio send failed, logging instead: {e}")
 
     print(f"[notifications] (no SMS provider configured) "
           f"Hospital alert for {snake}:\n{message}\n")
-    _log_locally(message, snake, patient_contact, channel, sent=False)
+    database.log_alert(snake, patient_contact, channel, message, sent_via_sms=False)
     return True
 
 
 def get_alerts(limit=50):
     """Returns recent hospital alerts, newest first — for the demo UI."""
-    if not ALERTS_LOG_FILE.exists():
-        return []
-    try:
-        alerts = json.loads(ALERTS_LOG_FILE.read_text())
-    except json.JSONDecodeError:
-        return []
-    alerts.sort(key=lambda a: a.get("created_at", ""), reverse=True)
-    return alerts[:limit]
+    return database.get_alerts(limit)
 
 
 def notification_backend():
-    return "twilio sms" if _using_twilio else "local log only (data/hospital_alerts.json)"
+    return "twilio sms" if _using_twilio else "logged to database"
