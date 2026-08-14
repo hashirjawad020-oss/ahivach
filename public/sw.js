@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ahivach-cache-v1';
+const CACHE_NAME = 'ahivach-cache-v2';
 const URLS_TO_CACHE = [
   '/',
   '/dashboard',
@@ -14,21 +14,23 @@ self.addEventListener('install', (event) => {
       return cache.addAll(URLS_TO_CACHE);
     })
   );
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  
+  // Network First, falling back to cache strategy
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchRes) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, fetchRes.clone());
-          return fetchRes;
-        });
+    fetch(event.request).then((fetchRes) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, fetchRes.clone());
+        return fetchRes;
       });
     }).catch(() => {
-      // Basic offline fallback (could return an offline HTML page here if desired)
-      return new Response("Offline Mode: Please check your internet connection.");
+      return caches.match(event.request).then((response) => {
+        return response || new Response("Offline Mode: Please check your internet connection.");
+      });
     })
   );
 });
@@ -46,4 +48,5 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  return self.clients.claim(); // Ensure clients are immediately controlled by the new worker
 });
