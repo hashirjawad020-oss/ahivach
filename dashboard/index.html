@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AHIVACH :: Emergency Snakebite Response Cell — Case Register</title>
+<title>AHIVACH :: Emergency Snakebite Response Network — Case Register</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B3D62">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 16px; }
@@ -37,13 +40,6 @@
   }
   .font-controls span:hover { background: #333; }
 
-  /* ── Tricolor strip ─────────────────────────────────── */
-  .tricolor { height: 4px; display: flex; }
-  .tricolor div { flex: 1; }
-  .tricolor .saffron { background: #FF9933; }
-  .tricolor .white { background: #F5F5F5; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-  .tricolor .green { background: #138808; }
-
   /* ── Letterhead ──────────────────────────────────────── */
   .letterhead {
     background: #FBF9F1;
@@ -52,6 +48,10 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 600px) {
+    .letterhead { flex-direction: column; text-align: center; gap: 8px; }
   }
   .seal { flex-shrink: 0; }
   .letterhead-text { flex: 1; text-align: center; }
@@ -61,11 +61,6 @@
     color: #0B3D62;
     font-weight: bold;
     letter-spacing: 0.5px;
-  }
-  .letterhead-text .dept-kn {
-    font-size: 0.75rem;
-    color: #5A5238;
-    margin-top: 1px;
   }
   .letterhead-text .cell-name {
     font-family: Georgia, serif;
@@ -81,6 +76,9 @@
     font-size: 0.6875rem;
     color: #5A5238;
     line-height: 1.6;
+  }
+  @media (max-width: 600px) {
+    .file-ref { text-align: center; }
   }
 
   /* ── Nav ─────────────────────────────────────────────── */
@@ -161,6 +159,12 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 22px;
+  }
+  @media (max-width: 800px) {
+    .ledger { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 400px) {
+    .ledger { grid-template-columns: 1fr; }
   }
   .ledger-box {
     background: #FBF9F1;
@@ -372,8 +376,6 @@
   </div>
 </div>
 
-<div class="tricolor"><div class="saffron"></div><div class="white"></div><div class="green"></div></div>
-
 <div class="letterhead">
   <div class="seal">
     <svg viewBox="0 0 120 120" width="58" height="58">
@@ -382,8 +384,8 @@
       </defs>
       <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
       <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
-      <text font-size="6.3" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
-        <textPath href="#sealring" startOffset="1%">EMERGENCY SNAKEBITE RESPONSE CELL &#8226; GOVT. OF KARNATAKA &#8226;</textPath>
+      <text font-size="7" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
+        <textPath href="#sealring" startOffset="11%">EMERGENCY SNAKEBITE RESPONSE NETWORK</textPath>
       </text>
       <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
       <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
@@ -391,13 +393,12 @@
     </svg>
   </div>
   <div class="letterhead-text">
-    <div class="dept-en">DEPARTMENT OF HEALTH &amp; FAMILY WELFARE</div>
-    <div class="dept-kn">ಆರೋಗ್ಯ ಮತ್ತು ಕುಟುಂಬ ಕಲ್ಯಾಣ ಇಲಾಖೆ &nbsp;·&nbsp; GOVERNMENT OF KARNATAKA</div>
-    <div class="cell-name">AHIVACH — Emergency Snakebite Response Cell</div>
+    <div class="dept-en">AHIVACH</div>
+    <div class="cell-name">Emergency Snakebite Response Network</div>
   </div>
   <div class="file-ref">
-    CIRCULAR NO: ESRC/2026/DASH<br>
-    STATUS: <span id="header-status-word">LOADING</span>
+    FILE NO: ESRC/2026/DASH<br>
+    STATUS: <span id="header-status-word">LIVE</span>
   </div>
 </div>
 
@@ -421,7 +422,6 @@
 
   <div class="panel-title">
     <span>SUMMARY OF RETURNS</span>
-    <span class="status-line" id="backend-status">Loading backend info...</span>
   </div>
 
   <div class="ledger">
@@ -463,10 +463,7 @@
       <a href="#" onclick="return false;">Feedback / Grievance</a>
     </div>
     <div class="disclaimer">
-      This is a demonstration system built for a public-health hackathon (Bengaluru, August 2026).
-      It is not an operational Government of Karnataka service. All hospital names shown are real
-      institutions known to stock polyvalent antivenom, referenced for demonstration accuracy only.
-      Content owned and maintained by Team AHIVACH. Designed &amp; developed for the AHIVACH project.
+      AHIVACH Emergency Snakebite Response Network. All hospital names shown are known to stock polyvalent antivenom. Designed &amp; developed for the AHIVACH project.
     </div>
     <div class="meta-row">
       <div>Site last updated: <span id="last-updated">—</span></div>
@@ -613,19 +610,6 @@ async function confirmSpecies(caseId) {
   } catch (e) { alert('Could not save species confirmation: ' + e.message); }
 }
 
-async function loadStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    document.getElementById('backend-status').textContent =
-      `Database: ${data.database_backend}  ·  Hospital alerts: ${data.notification_backend}`;
-    document.getElementById('header-status-word').textContent = 'LIVE';
-  } catch (e) {
-    document.getElementById('backend-status').textContent = 'Could not reach backend.';
-    document.getElementById('header-status-word').textContent = 'OFFLINE';
-  }
-}
-
 async function loadCases() {
   try {
     const res = await fetch('/api/cases?limit=50');
@@ -726,12 +710,16 @@ async function logFollowup(caseId) {
   }
 }
 
-loadStatus();
 loadCases();
 loadAlerts();
 setInterval(loadCases, 10000);
 setInterval(loadAlerts, 10000);
-setInterval(loadStatus, 10000);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
 </script>
 </body>
 </html>

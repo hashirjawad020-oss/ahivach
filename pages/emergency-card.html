@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AHIVACH :: Emergency Card</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B3D62">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -60,6 +63,11 @@
 
   .fine-print { font-size: 0.625rem; color: #5A5238; margin-top: 14px; text-align: center; }
 
+  @media (max-width: 600px) {
+    .cols { flex-direction: column; }
+    .qr-row { flex-direction: column; text-align: center; }
+  }
+
   @media print {
     body { background: #fff; padding: 0; }
     .page-actions { display: none; }
@@ -78,7 +86,7 @@
   <div class="card-header">
     <div>
       <div class="title-en">AHIVACH — SNAKEBITE EMERGENCY CARD</div>
-      <div class="title-sub">Emergency Snakebite Response Cell &middot; Govt. of Karnataka (Pilot Demo)</div>
+      <div class="title-sub">Emergency Snakebite Response Network</div>
     </div>
   </div>
 
@@ -122,10 +130,17 @@
 
   <div class="fine-print">
     Clinical protocol basis: WHO / NCDC snakebite management guidance. This card gives general
-    first-aid guidance only and does not replace professional medical care. Demonstration material —
-    pilot content pending clinical sign-off.
+    first-aid guidance only and does not replace professional medical care.
   </div>
 </div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+</script>
 
 </body>
 </html>

@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AHIVACH :: Online Emergency Reporting Form — Simulation Kiosk</title>
+<title>AHIVACH :: Simulator</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B3D62">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 16px; }
@@ -34,48 +37,30 @@
   }
   .font-controls span:hover { background: #333; }
 
-  .tricolor { height: 4px; display: flex; }
-  .tricolor div { flex: 1; }
-  .tricolor .saffron { background: #FF9933; }
-  .tricolor .white { background: #F5F5F5; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
-  .tricolor .green { background: #138808; }
-
+  /* ── Letterhead ──────────────────────────────────────── */
   .letterhead {
-    background: #FBF9F1;
-    border-bottom: 3px double #0B3D62;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    background: #FBF9F1; border-bottom: 3px double #0B3D62; padding: 14px 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  @media (max-width: 600px) {
+    .letterhead { flex-direction: column; text-align: center; gap: 8px; }
   }
   .seal { flex-shrink: 0; }
   .letterhead-text { flex: 1; text-align: center; }
   .letterhead-text .dept-en {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 1.15rem;
-    color: #0B3D62;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-  }
-  .letterhead-text .dept-kn {
-    font-size: 0.75rem;
-    color: #5A5238;
-    margin-top: 1px;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem;
+    color: #0B3D62; font-weight: bold; letter-spacing: 0.5px;
   }
   .letterhead-text .cell-name {
-    font-family: Georgia, serif;
-    font-size: 0.8125rem;
-    color: #8B1A1A;
-    margin-top: 5px;
-    font-style: italic;
+    font-family: Georgia, serif; font-size: 0.8125rem; color: #8B1A1A;
+    margin-top: 5px; font-style: italic;
   }
   .file-ref {
-    flex-shrink: 0;
-    text-align: right;
-    font-family: 'Courier New', monospace;
-    font-size: 0.6875rem;
-    color: #5A5238;
-    line-height: 1.6;
+    flex-shrink: 0; text-align: right; font-family: 'Courier New', monospace;
+    font-size: 0.6875rem; color: #5A5238; line-height: 1.6;
+  }
+  @media (max-width: 600px) {
+    .file-ref { text-align: center; }
   }
 
   .gov-nav { background: #0B3D62; display: flex; flex-wrap: wrap; }
@@ -323,8 +308,6 @@
   </div>
 </div>
 
-<div class="tricolor"><div class="saffron"></div><div class="white"></div><div class="green"></div></div>
-
 <div class="letterhead">
   <div class="seal">
     <svg viewBox="0 0 120 120" width="58" height="58">
@@ -333,8 +316,8 @@
       </defs>
       <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
       <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
-      <text font-size="6.3" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
-        <textPath href="#sealring2" startOffset="1%">EMERGENCY SNAKEBITE RESPONSE CELL &#8226; GOVT. OF KARNATAKA &#8226;</textPath>
+      <text font-size="7" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
+        <textPath href="#sealring2" startOffset="11%">EMERGENCY SNAKEBITE RESPONSE NETWORK</textPath>
       </text>
       <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
       <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
@@ -342,9 +325,8 @@
     </svg>
   </div>
   <div class="letterhead-text">
-    <div class="dept-en">DEPARTMENT OF HEALTH &amp; FAMILY WELFARE</div>
-    <div class="dept-kn">ಆರೋಗ್ಯ ಮತ್ತು ಕುಟುಂಬ ಕಲ್ಯಾಣ ಇಲಾಖೆ &nbsp;·&nbsp; GOVERNMENT OF KARNATAKA</div>
-    <div class="cell-name">AHIVACH — Online Emergency Reporting &amp; Simulation Kiosk</div>
+    <div class="dept-en">AHIVACH</div>
+    <div class="cell-name">Online Emergency Reporting &amp; Simulation Kiosk</div>
   </div>
   <div class="file-ref">
     FORM REF: ESRC/SIM/2026<br>
@@ -371,11 +353,9 @@
 
   <div class="form-notice">
     <b>NOTICE:</b> This kiosk exercises the identical response logic used by the live WhatsApp
-    and voice-call channels, without requiring a telephone connection. Any case filed below is
+    and voice-call channels. Any case filed below is
     written to the official register and triggers a real hospital alert.
   </div>
-
-  <div class="status-strip" id="status">Loading backend info…</div>
 
   <div class="panel-title">SELECT REPORTING METHOD</div>
   <div class="form-tabs">
@@ -427,9 +407,7 @@
       <a href="#" onclick="return false;">Feedback / Grievance</a>
     </div>
     <div class="disclaimer">
-      This is a demonstration system built for a public-health hackathon (Bengaluru, August 2026).
-      It is not an operational Government of Karnataka service. Content owned and maintained by
-      Team AHIVACH.
+      AHIVACH Emergency Snakebite Response Network. All hospital names shown are known to stock polyvalent antivenom. Designed &amp; developed for the AHIVACH project.
     </div>
   </div>
 </footer>
@@ -460,20 +438,7 @@ document.querySelectorAll('.form-tab').forEach(tab => {
   });
 });
 
-// ── Status banner ──────────────────────────────────────
-async function loadStatus() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    document.getElementById('status').innerHTML =
-      `DATABASE BACKEND: <b>${data.database_backend}</b> &nbsp;·&nbsp; HOSPITAL ALERT ROUTE: <b>${data.notification_backend}</b>`;
-  } catch (e) {
-    document.getElementById('status').textContent = 'Could not reach backend.';
-  }
-}
-loadStatus();
-
-// ── Chat (Form A) ──────────────────────────────────────
+// ── Boot ─────────────────────────────────────────────────
 function addBubble(containerId, text, isSelf, isWarning) {
   const container = document.getElementById(containerId);
   const div = document.createElement('div');
@@ -581,6 +546,12 @@ function restartCall() {
 // ── Boot ─────────────────────────────────────────────────
 startChat();
 startCall();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
 </script>
 </body>
 </html>

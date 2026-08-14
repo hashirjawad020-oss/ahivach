@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AHIVACH :: Prevention &amp; Community Awareness</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B3D62">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { font-size: 16px; }
@@ -39,7 +42,10 @@
 
   .letterhead {
     background: #FBF9F1; border-bottom: 3px double #0B3D62; padding: 14px 20px;
-    display: flex; align-items: center; gap: 16px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  @media (max-width: 600px) {
+    .letterhead { flex-direction: column; text-align: center; gap: 8px; }
   }
   .seal { flex-shrink: 0; }
   .letterhead-text { flex: 1; text-align: center; }
@@ -47,7 +53,6 @@
     font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem;
     color: #0B3D62; font-weight: bold; letter-spacing: 0.5px;
   }
-  .letterhead-text .dept-kn { font-size: 0.75rem; color: #5A5238; margin-top: 1px; }
   .letterhead-text .cell-name {
     font-family: Georgia, serif; font-size: 0.8125rem; color: #8B1A1A;
     margin-top: 5px; font-style: italic;
@@ -55,6 +60,9 @@
   .file-ref {
     flex-shrink: 0; text-align: right; font-family: 'Courier New', monospace;
     font-size: 0.6875rem; color: #5A5238; line-height: 1.6;
+  }
+  @media (max-width: 600px) {
+    .file-ref { text-align: center; }
   }
 
   .gov-nav { background: #0B3D62; display: flex; flex-wrap: wrap; }
@@ -83,6 +91,7 @@
   .risk-low    { background: #F0F7EC; border-color: #138808; color: #0F5D1F; }
   .risk-banner .sub { font-weight: normal; font-size: 0.75rem; margin-top: 4px; color: #3A3524; }
 
+  .table-scroll { overflow-x: auto; }
   table.district {
     width: 100%; border-collapse: collapse; background: #FBF9F1;
     border: 1px solid #8A8370; margin-bottom: 26px;
@@ -151,16 +160,14 @@
   </div>
 </div>
 
-<div class="tricolor"><div class="saffron"></div><div class="white"></div><div class="green"></div></div>
-
 <div class="letterhead">
   <div class="seal">
     <svg viewBox="0 0 120 120" width="58" height="58">
       <defs><path id="sealring3" d="M 60,60 m -50,0 a 50,50 0 1,1 100,0 a 50,50 0 1,1 -100,0" /></defs>
       <circle cx="60" cy="60" r="58" fill="#FBF9F1" stroke="#0B3D62" stroke-width="2"/>
       <circle cx="60" cy="60" r="48" fill="none" stroke="#8B1A1A" stroke-width="1"/>
-      <text font-size="6.3" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
-        <textPath href="#sealring3" startOffset="1%">EMERGENCY SNAKEBITE RESPONSE CELL &#8226; GOVT. OF KARNATAKA &#8226;</textPath>
+      <text font-size="7" fill="#0B3D62" letter-spacing="1.4" font-family="Georgia, serif">
+        <textPath href="#sealring3" startOffset="11%">EMERGENCY SNAKEBITE RESPONSE NETWORK</textPath>
       </text>
       <text x="60" y="58" text-anchor="middle" font-size="22">🐍</text>
       <text x="60" y="75" text-anchor="middle" font-size="10" font-family="Georgia, serif" fill="#8B1A1A" font-weight="bold">AHIVACH</text>
@@ -168,11 +175,10 @@
     </svg>
   </div>
   <div class="letterhead-text">
-    <div class="dept-en">DEPARTMENT OF HEALTH &amp; FAMILY WELFARE</div>
-    <div class="dept-kn">ಆರೋಗ್ಯ ಮತ್ತು ಕುಟುಂಬ ಕಲ್ಯಾಣ ಇಲಾಖೆ &nbsp;·&nbsp; GOVERNMENT OF KARNATAKA</div>
-    <div class="cell-name">AHIVACH — Prevention &amp; Community Awareness</div>
+    <div class="dept-en">AHIVACH</div>
+    <div class="cell-name">Prevention &amp; Community Awareness</div>
   </div>
-  <div class="file-ref">CIRCULAR NO: ESRC/2026/PREV<br>MODE: PILOT / DEMO</div>
+  <div class="file-ref">FILE NO: ESRC/2026/PREV<br>MODE: LIVE</div>
 </div>
 
 <nav class="gov-nav">
@@ -191,7 +197,7 @@
     Loading seasonal risk assessment…
   </div>
 
-  <div class="panel-title">ILLUSTRATIVE DISTRICT RISK LEVELS — PILOT REGION</div>
+  <div class="table-scroll">
   <table class="district">
     <thead><tr><th>District</th><th>Relative Risk (Monsoon)</th><th>Primary Species of Concern</th></tr></thead>
     <tbody>
@@ -201,7 +207,8 @@
       <tr><td>Bengaluru Rural</td><td><span class="risk-tag low">Low</span></td><td>Cobra</td></tr>
     </tbody>
   </table>
-  <div class="data-note">Illustrative placeholder data for the pilot demo — to be replaced with verified district/seasonal snake-activity data before field deployment.</div>
+  </div>
+  <div class="data-note">Illustrative placeholder data for the region — to be replaced with verified district/seasonal snake-activity data.</div>
 
   <div class="panel-title">FROM THE COMMUNITY</div>
   <div class="story-card">
@@ -241,10 +248,7 @@
       <a href="/emergency-card">Emergency Card</a>
     </div>
     <div class="disclaimer">
-      This is a demonstration system built for a public-health hackathon (Bengaluru, August 2026).
-      It is not an operational Government of Karnataka service. District risk data and community
-      accounts shown here are illustrative placeholders pending field validation. Content owned and
-      maintained by Team AHIVACH.
+      AHIVACH Emergency Snakebite Response Network. Designed &amp; developed for the AHIVACH project.
     </div>
   </div>
 </footer>
@@ -273,6 +277,12 @@ function renderRiskBanner() {
   }
 }
 renderRiskBanner();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
 </script>
 </body>
 </html>

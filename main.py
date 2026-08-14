@@ -142,14 +142,31 @@ def emergency_card_page():
     return FileResponse(BASE_DIR / "pages" / "emergency-card.html")
 
 
+@app.get("/manifest.json")
+def manifest():
+    return FileResponse(BASE_DIR / "public" / "manifest.json")
+
+
+@app.get("/sw.js")
+def service_worker():
+    return FileResponse(BASE_DIR / "public" / "sw.js")
+
+
+@app.get("/icons/{filename}")
+def icon_file(filename: str):
+    path = BASE_DIR / "public" / "icons" / filename
+    if not path.is_file():
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Icon not found")
+    return FileResponse(path)
+
+
 # ── HEALTH CHECK ─────────────────────────────────────────
 @app.get("/")
 def home():
     return {
         "status": "AHIVACH is running",
         "systems": ["WhatsApp Bot", "IVR Bot", "Web Simulator"],
-        "database_backend": database.storage_backend(),
-        "notification_backend": notifications.notification_backend(),
         "try": ["/simulator", "/dashboard", "/prevention", "/emergency-card"],
-        "version": "1.1",
+        "version": "1.2",
     }
