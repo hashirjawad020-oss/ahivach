@@ -64,6 +64,8 @@ def log_case(patient_contact, channel, snake_identified, answers):
         "channel": channel,
         "snake_identified": snake_identified,
         "answers": str(answers),
+        "ambulance_status": "requested",
+        "confirmed_species": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -74,6 +76,7 @@ def log_case(patient_contact, channel, snake_identified, answers):
                 "channel": channel,
                 "snake_identified": snake_identified,
                 "answers": str(answers),
+                "ambulance_status": "requested",
             }).execute()
             print(f"[database] Case logged to Supabase: "
                   f"{snake_identified} via {channel}")
@@ -91,6 +94,40 @@ def log_case(patient_contact, channel, snake_identified, answers):
         return True
     except Exception as e:
         print(f"[database] Local write failed: {e}")
+        return False
+
+
+def update_case_field(case_id, field, value):
+    """
+    Updates a single field on a case record. Works with both
+    Supabase and local JSON backends. Used for ambulance status
+    transitions and confirmed species feedback.
+    Returns True on success, False on failure (never raises).
+    """
+    if _using_supabase:
+        try:
+            _supabase_client.table("cases").update(
+                {field: value, "status_updated_at": datetime.now(timezone.utc).isoformat()}
+            ).eq("id", case_id).execute()
+            print(f"[database] Updated {field}={value} for case {case_id} (Supabase)")
+            return True
+        except Exception as e:
+            print(f"[database] Supabase update failed, "
+                  f"trying local file: {e}")
+
+    try:
+        cases = _read_local()
+        for c in cases:
+            if c.get("id") == case_id:
+                c[field] = value
+                c["status_updated_at"] = datetime.now(timezone.utc).isoformat()
+                _write_local(cases)
+                print(f"[database] Updated {field}={value} for case {case_id} (local)")
+                return True
+        print(f"[database] Case {case_id} not found in local file")
+        return False
+    except Exception as e:
+        print(f"[database] Local update failed: {e}")
         return False
 
 
@@ -120,3 +157,4 @@ def get_cases(limit=50):
 
 def storage_backend():
     return "supabase" if _using_supabase else "local file (data/cases.json)"
+

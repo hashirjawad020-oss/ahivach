@@ -42,9 +42,66 @@ def identify_snake(answers):
     else:
         return "Unknown"
 
+# ── Ambulance status constants ────────────────────────────
+# Tracks the ambulance lifecycle per case. The hospital must
+# confirm before dispatch to prevent abuse (per doctor advice).
+AMBULANCE_REQUESTED = "requested"
+AMBULANCE_CONFIRMED = "confirmed"
+AMBULANCE_DISPATCHED = "dispatched"
+AMBULANCE_ARRIVED = "arrived"
+
+AMBULANCE_STATUSES = [
+    AMBULANCE_REQUESTED,
+    AMBULANCE_CONFIRMED,
+    AMBULANCE_DISPATCHED,
+    AMBULANCE_ARRIVED,
+]
+
+# ── Why species matters (shown to patient) ────────────────
+# The doctor confirmed: every patient gets the same polyvalent
+# antivenom. The species prediction drives WHAT THE HOSPITAL
+# PREPARES FOR — different monitoring tracks, different teams
+# on standby. This text makes that explicit for the caller.
+_WHY_IT_MATTERS = {
+    "Indian Cobra": (
+        "🏥 WHY THIS MATTERS: The hospital is now preparing "
+        "ventilator support and airway management based on this "
+        "assessment. All patients receive the same polyvalent "
+        "antivenom — the species tells the team what COMPLICATIONS "
+        "to watch for, not what to inject."
+    ),
+    "Common Krait": (
+        "🏥 WHY THIS MATTERS: The hospital is now preparing "
+        "ICU monitoring and delayed-collapse watch based on this "
+        "assessment. All patients receive the same polyvalent "
+        "antivenom — the species tells the team what COMPLICATIONS "
+        "to watch for, not what to inject."
+    ),
+    "Russell's Viper": (
+        "🏥 WHY THIS MATTERS: The hospital is now preparing "
+        "dialysis and clotting support based on this assessment. "
+        "All patients receive the same polyvalent antivenom — "
+        "the species tells the team what COMPLICATIONS to watch "
+        "for, not what to inject."
+    ),
+    "Saw-Scaled Viper": (
+        "🏥 WHY THIS MATTERS: The hospital is now preparing "
+        "blood products and haematology standby based on this "
+        "assessment. All patients receive the same polyvalent "
+        "antivenom — the species tells the team what COMPLICATIONS "
+        "to watch for, not what to inject."
+    ),
+    "Unknown": (
+        "🏥 The hospital is preparing for all scenarios. "
+        "All patients receive polyvalent antivenom regardless "
+        "of species — doctors confirm treatment on arrival."
+    ),
+}
+
 FIRST_AID = {
     "Indian Cobra": (
-        "⚠️ PROBABLE: INDIAN COBRA\n\n"
+        "⚠️ LIKELY MATCH: INDIAN COBRA "
+        "(based on your description)\n\n"
         "COMMON FIRST AID — DO THIS NOW:\n"
         "✅ Stay calm, lie down, keep still\n"
         "✅ Keep bitten limb BELOW heart level\n"
@@ -58,13 +115,15 @@ FIRST_AID = {
         "swallowing or breathing. These mean "
         "paralysis is starting. The hospital has "
         "been alerted to prepare ventilator support.\n\n"
-        "🏥 GO TO HOSPITAL IMMEDIATELY\n\n"
-        "This is a guide only. All patients receive "
-        "polyvalent antivenom regardless of species. "
-        "Doctors confirm all treatment on arrival."
+        + _WHY_IT_MATTERS["Indian Cobra"] + "\n\n"
+        "🏥 GO TO HOSPITAL IMMEDIATELY\n"
+        "🚑 An ambulance request has been sent to "
+        "the hospital. They will call you to confirm "
+        "your location before dispatching."
     ),
     "Common Krait": (
-        "⚠️ PROBABLE: COMMON KRAIT\n\n"
+        "⚠️ LIKELY MATCH: COMMON KRAIT "
+        "(based on your description)\n\n"
         "COMMON FIRST AID — DO THIS NOW:\n"
         "✅ Stay calm, lie down, keep still\n"
         "✅ Keep bitten limb BELOW heart level\n"
@@ -80,13 +139,15 @@ FIRST_AID = {
         "at night. DO NOT leave them alone under "
         "any circumstances. The hospital has been "
         "alerted for ICU monitoring.\n\n"
-        "🏥 GO TO HOSPITAL IMMEDIATELY\n\n"
-        "This is a guide only. All patients receive "
-        "polyvalent antivenom regardless of species. "
-        "Doctors confirm all treatment on arrival."
+        + _WHY_IT_MATTERS["Common Krait"] + "\n\n"
+        "🏥 GO TO HOSPITAL IMMEDIATELY\n"
+        "🚑 An ambulance request has been sent to "
+        "the hospital. They will call you to confirm "
+        "your location before dispatching."
     ),
     "Russell's Viper": (
-        "⚠️ PROBABLE: RUSSELL'S VIPER\n\n"
+        "⚠️ LIKELY MATCH: RUSSELL'S VIPER "
+        "(based on your description)\n\n"
         "COMMON FIRST AID — DO THIS NOW:\n"
         "✅ Stay calm, lie down, keep still\n"
         "✅ Keep bitten limb BELOW heart level\n"
@@ -101,13 +162,15 @@ FIRST_AID = {
         "failure is likely. The hospital has been "
         "alerted to prepare dialysis and clotting "
         "support.\n\n"
-        "🏥 GO TO HOSPITAL IMMEDIATELY\n\n"
-        "This is a guide only. All patients receive "
-        "polyvalent antivenom regardless of species. "
-        "Doctors confirm all treatment on arrival."
+        + _WHY_IT_MATTERS["Russell's Viper"] + "\n\n"
+        "🏥 GO TO HOSPITAL IMMEDIATELY\n"
+        "🚑 An ambulance request has been sent to "
+        "the hospital. They will call you to confirm "
+        "your location before dispatching."
     ),
     "Saw-Scaled Viper": (
-        "⚠️ PROBABLE: SAW-SCALED VIPER\n\n"
+        "⚠️ LIKELY MATCH: SAW-SCALED VIPER "
+        "(based on your description)\n\n"
         "COMMON FIRST AID — DO THIS NOW:\n"
         "✅ Stay calm, lie down, keep still\n"
         "✅ Keep bitten limb BELOW heart level\n"
@@ -121,13 +184,14 @@ FIRST_AID = {
         "will not stop. Patient needs blood products "
         "urgently. The hospital has been alerted. "
         "Leave for hospital immediately.\n\n"
-        "🏥 GO TO HOSPITAL IMMEDIATELY\n\n"
-        "This is a guide only. All patients receive "
-        "polyvalent antivenom regardless of species. "
-        "Doctors confirm all treatment on arrival."
+        + _WHY_IT_MATTERS["Saw-Scaled Viper"] + "\n\n"
+        "🏥 GO TO HOSPITAL IMMEDIATELY\n"
+        "🚑 An ambulance request has been sent to "
+        "the hospital. They will call you to confirm "
+        "your location before dispatching."
     ),
     "Unknown": (
-        "⚠️ SNAKEBITE EMERGENCY — SPECIES UNKNOWN\n\n"
+        "⚠️ SNAKEBITE EMERGENCY — SPECIES UNCONFIRMED\n\n"
         "COMMON FIRST AID — DO THIS NOW:\n"
         "✅ Stay calm, lie down, keep still\n"
         "✅ Keep bitten limb BELOW heart level\n"
@@ -136,12 +200,11 @@ FIRST_AID = {
         "❌ Do NOT tie a tourniquet\n"
         "❌ Do NOT suck the venom\n"
         "❌ Do NOT give food, water or alcohol\n\n"
-        "The hospital has been alerted and is "
-        "preparing for your arrival.\n\n"
-        "🏥 GO TO HOSPITAL IMMEDIATELY\n\n"
-        "This is a guide only. All patients receive "
-        "polyvalent antivenom regardless of species. "
-        "Doctors confirm all treatment on arrival."
+        + _WHY_IT_MATTERS["Unknown"] + "\n\n"
+        "🏥 GO TO HOSPITAL IMMEDIATELY\n"
+        "🚑 An ambulance request has been sent to "
+        "the hospital. They will call you to confirm "
+        "your location before dispatching."
     ),
 }
 
@@ -196,32 +259,42 @@ RECOMMENDED_HOSPITALS_BENGALURU = [
 
 IVR_WARNINGS = {
     "Indian Cobra": (
-        "Indian Cobra identified. Watch for drooping eyelids, "
+        "Likely match: Indian Cobra, based on your description. "
+        "Watch for drooping eyelids, "
         "difficulty swallowing, or breathing difficulty — paralysis "
         "starting. Hospital alerted for ventilator support. "
+        "An ambulance request has been sent. "
         "Go to hospital immediately."
     ),
     "Common Krait": (
-        "Common Krait identified. Critical warning: this venom works "
+        "Likely match: Common Krait, based on your description. "
+        "Critical warning: this venom works "
         "slowly. The patient may seem fine now but can collapse "
         "suddenly in two to six hours, especially at night. Do not "
         "leave them alone. Hospital alerted for ICU monitoring. "
+        "An ambulance request has been sent. "
         "Go to hospital immediately."
     ),
     "Russell's Viper": (
-        "Russell's Viper identified. Watch for rapid swelling, blood "
+        "Likely match: Russell's Viper, based on your description. "
+        "Watch for rapid swelling, blood "
         "in urine, or bleeding from gums. Kidney failure is likely "
         "within hours. Hospital alerted to prepare dialysis and "
-        "clotting support. Go to hospital immediately."
+        "clotting support. An ambulance request has been sent. "
+        "Go to hospital immediately."
     ),
     "Saw-Scaled Viper": (
-        "Saw-Scaled Viper identified. Watch for bleeding from the "
+        "Likely match: Saw-Scaled Viper, based on your description. "
+        "Watch for bleeding from the "
         "bite that will not stop. Patient needs blood products "
-        "urgently. Hospital alerted. Go to hospital immediately."
+        "urgently. Hospital alerted. An ambulance request has "
+        "been sent. Go to hospital immediately."
     ),
     "Unknown": (
-        "Snake species unknown. Hospital alerted and preparing for "
+        "Snake species could not be determined from your answers. "
+        "Hospital alerted and preparing for "
         "your arrival with full snakebite protocol. "
+        "An ambulance request has been sent. "
         "Go to hospital immediately."
     ),
 }
@@ -254,16 +327,34 @@ HOSPITAL_PREP = {
     ),
 }
 
+# ── Confidence levels for the 4-question screening ────────
+_CONFIDENCE = {
+    "Indian Cobra": "MODERATE",
+    "Common Krait": "MODERATE",
+    "Russell's Viper": "MODERATE",
+    "Saw-Scaled Viper": "MODERATE",
+    "Unknown": "LOW — species could not be determined",
+}
+
 def build_hospital_message(snake, patient_contact, channel):
     prep = HOSPITAL_PREP.get(snake, HOSPITAL_PREP["Unknown"])
+    confidence = _CONFIDENCE.get(snake, "LOW")
     return (
-        f"AHIVACH EMERGENCY ALERT\n"
-        f"Probable: {snake}\n"
-        f"Patient: {patient_contact}\n"
-        f"Channel: {channel.upper()}\n"
-        f"{prep}\n"
-        f"Administer polyvalent ASV regardless of species.\n"
-        f"— AHIVACH System"
+        f"🚨 AHIVACH EMERGENCY ALERT\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"LIKELY SPECIES: {snake}\n"
+        f"ASSESSMENT CONFIDENCE: {confidence} "
+        f"(4-question rapid screening)\n"
+        f"PATIENT CONTACT: {patient_contact}\n"
+        f"CHANNEL: {channel.upper()}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"{prep}\n\n"
+        f"TREATMENT: Administer polyvalent ASV regardless "
+        f"of species. Confirm species on arrival.\n\n"
+        f"🚑 AMBULANCE: Requested. Tap CONFIRM on dashboard "
+        f"after verification call to patient, then DISPATCH.\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"— AHIVACH Emergency Response System"
     )
 
 

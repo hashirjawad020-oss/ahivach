@@ -6,7 +6,7 @@
 # actual product.
 
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 
@@ -50,6 +50,60 @@ def api_status():
         "database_backend": database.storage_backend(),
         "notification_backend": notifications.notification_backend(),
     }
+
+
+# ── AMBULANCE CONFIRM-BEFORE-DISPATCH FLOW ─────────────────
+# Doctor-validated: hospital must confirm via phone call before
+# ambulance is dispatched, to prevent abuse. Two-step flow:
+# 1. Hospital receives alert → taps "Confirm" after calling patient
+# 2. Hospital taps "Dispatch" → ambulance status updates
+
+@app.post("/api/cases/{case_id}/ambulance/confirm")
+def ambulance_confirm(case_id: str):
+    """Step 1: Hospital confirms the case is genuine after calling the patient."""
+    success = database.update_case_field(case_id, "ambulance_status", "confirmed")
+    if not success:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Case not found")
+    return {"status": "confirmed", "case_id": case_id}
+
+
+@app.post("/api/cases/{case_id}/ambulance/dispatch")
+def ambulance_dispatch(case_id: str):
+    """Step 2: Hospital dispatches ambulance after confirmation."""
+    success = database.update_case_field(case_id, "ambulance_status", "dispatched")
+    if not success:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Case not found")
+    return {"status": "dispatched", "case_id": case_id}
+
+
+@app.post("/api/cases/{case_id}/ambulance/arrived")
+def ambulance_arrived(case_id: str):
+    """Optional: mark ambulance as arrived at patient location."""
+    success = database.update_case_field(case_id, "ambulance_status", "arrived")
+    if not success:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Case not found")
+    return {"status": "arrived", "case_id": case_id}
+
+
+# ── SPECIES FEEDBACK LOOP ──────────────────────────────────
+# After treatment, hospital confirms the actual species. This
+# feeds back to improve screening questions over time.
+
+@app.post("/api/cases/{case_id}/confirm-species")
+def confirm_species(case_id: str, payload: dict = Body(...)):
+    """Hospital confirms the actual species after treatment."""
+    confirmed = payload.get("confirmed_species")
+    if not confirmed:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="confirmed_species is required")
+    success = database.update_case_field(case_id, "confirmed_species", confirmed)
+    if not success:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Case not found")
+    return {"status": "species_confirmed", "case_id": case_id, "confirmed_species": confirmed}
 
 
 # ── STATIC PAGES ───────────────────────────────────────────

@@ -18,6 +18,8 @@ from core import (
     IVR_WARNINGS,
     SNAKE_MAP,
     recommended_hospitals_text,
+    build_hospital_message,
+    HOSPITAL_PREP,
 )
 
 # Key = session_id (a random id the browser generates per tab),
@@ -84,7 +86,16 @@ def setup_web_routes(app):
         log_case(f"web-session:{session_id}", "web", snake, session["answers"])
 
         reply = FIRST_AID[snake] + "\n\n" + recommended_hospitals_text()
-        return {"reply": reply, "complete": True, "snake": snake}
+        hospital_preview = build_hospital_message(
+            snake, f"web-session:{session_id}", "web"
+        )
+        return {
+            "reply": reply,
+            "complete": True,
+            "snake": snake,
+            "hospital_alert_preview": hospital_preview,
+            "hospital_prep": HOSPITAL_PREP.get(snake, HOSPITAL_PREP["Unknown"]),
+        }
 
     @app.post("/web/call/start")
     async def web_call_start(payload: dict = Body(...)):

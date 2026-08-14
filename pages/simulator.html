@@ -232,6 +232,70 @@
     margin-bottom: 16px;
   }
 
+  /* ── Split-screen result panels ──────────────────────── */
+  .split-result {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  @media (max-width: 700px) {
+    .split-result { grid-template-columns: 1fr; }
+  }
+  .split-panel {
+    background: #FBF9F1;
+    border: 2px solid;
+    padding: 4px;
+  }
+  .split-panel-inner {
+    border: 1px dashed;
+    padding: 12px;
+  }
+  .split-panel.patient {
+    border-color: #138808;
+  }
+  .split-panel.patient .split-panel-inner {
+    border-color: #8BC48B;
+  }
+  .split-panel.hospital {
+    border-color: #8B1A1A;
+  }
+  .split-panel.hospital .split-panel-inner {
+    border-color: #C48B8B;
+  }
+  .split-label {
+    font-family: Georgia, serif;
+    font-size: 0.8125rem;
+    font-weight: bold;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .split-panel.patient .split-label {
+    background: #E8F5E9;
+    color: #0F5D1F;
+    border-left: 4px solid #138808;
+  }
+  .split-panel.hospital .split-label {
+    background: #FBE9E7;
+    color: #8B1A1A;
+    border-left: 4px solid #8B1A1A;
+  }
+  .split-subtitle {
+    font-size: 0.6875rem;
+    color: #5A5238;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+  .split-content {
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    line-height: 1.55;
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
   footer {
     background: #0B3D62;
     color: #C9C2A6;
@@ -298,7 +362,7 @@
 
 <div class="ticker-wrap">
   <div class="ticker">
-    ⚠ THIS IS A TEST / TRAINING KIOSK &nbsp;&nbsp;&#8226;&nbsp;&nbsp; ENTRIES FILED HERE APPEAR ON THE LIVE CASE REGISTER &nbsp;&nbsp;&#8226;&nbsp;&nbsp; HOSPITAL CORRESPONDENCE IS ACTUALLY ISSUED &nbsp;&nbsp;&#8226;&nbsp;&nbsp; FOR REAL EMERGENCIES USE FORM A OR FORM B DIRECTLY &nbsp;&nbsp;&#8226;&nbsp;&nbsp;
+    ⚠ THIS IS A TEST / TRAINING KIOSK &nbsp;&nbsp;&#8226;&nbsp;&nbsp; ENTRIES FILED HERE APPEAR ON THE LIVE CASE REGISTER &nbsp;&nbsp;&#8226;&nbsp;&nbsp; HOSPITAL CORRESPONDENCE IS ACTUALLY ISSUED &nbsp;&nbsp;&#8226;&nbsp;&nbsp; SPECIES PREDICTION DRIVES HOSPITAL PREP — NOT INJECTION &nbsp;&nbsp;&#8226;&nbsp;&nbsp; FOR REAL EMERGENCIES USE FORM A OR FORM B DIRECTLY &nbsp;&nbsp;&#8226;&nbsp;&nbsp;
   </div>
 </div>
 
@@ -329,6 +393,8 @@
           <button class="btn-gov no" onclick="sendAnswer('no')">NO</button>
         </div>
         <button class="btn-restart" onclick="restartChat()">↻ Discard and start a fresh report</button>
+        <!-- Split result appears here after completion -->
+        <div id="chat-split-result"></div>
       </div>
     </div>
   </div>
@@ -428,9 +494,37 @@ async function chatPost(message) {
 
 async function startChat() {
   document.getElementById('chat-log').innerHTML = '';
+  document.getElementById('chat-split-result').innerHTML = '';
   const data = await chatPost('');
   addBubble('chat-log', data.reply, false, data.complete);
   document.getElementById('chat-controls').style.display = data.complete ? 'none' : 'flex';
+}
+
+function renderSplitResult(data) {
+  const container = document.getElementById('chat-split-result');
+  container.innerHTML = `
+    <div class="split-result">
+      <div class="split-panel patient">
+        <div class="split-panel-inner">
+          <div class="split-label">📱 What the Caller Sees</div>
+          <div class="split-subtitle">This message is sent to the person reporting the bite via WhatsApp / SMS / IVR</div>
+          <div class="split-content">${escapeHtml(data.reply)}</div>
+        </div>
+      </div>
+      <div class="split-panel hospital">
+        <div class="split-panel-inner">
+          <div class="split-label">🏥 What the Hospital Receives</div>
+          <div class="split-subtitle">This alert is sent simultaneously to the nearest ASV-stocked hospital</div>
+          <div class="split-content">${escapeHtml(data.hospital_alert_preview)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
 }
 
 async function sendAnswer(answer) {
@@ -439,6 +533,10 @@ async function sendAnswer(answer) {
   addBubble('chat-log', data.reply, false, data.complete);
   if (data.complete) {
     document.getElementById('chat-controls').style.display = 'none';
+    // Show split-screen result
+    if (data.hospital_alert_preview) {
+      renderSplitResult(data);
+    }
   }
 }
 
@@ -472,7 +570,7 @@ async function pressDigit(digit) {
   const data = await res.json();
   addBubble('call-log', data.message, false, true);
   document.getElementById('call-status').textContent =
-    'CALL ENDED — HOSPITAL ALERTED — CASE LOGGED TO REGISTER.';
+    'CALL ENDED — HOSPITAL ALERTED — CASE LOGGED TO REGISTER — AMBULANCE REQUESTED.';
 }
 
 function restartCall() {

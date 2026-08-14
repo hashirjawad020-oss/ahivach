@@ -129,7 +129,7 @@
   }
 
   /* ── Main ────────────────────────────────────────────── */
-  main { max-width: 980px; margin: 18px auto; padding: 0 16px 40px; }
+  main { max-width: 1100px; margin: 18px auto; padding: 0 16px 40px; }
 
   .breadcrumb {
     font-size: 0.6875rem;
@@ -158,7 +158,7 @@
   /* ── Ledger stat boxes ───────────────────────────────── */
   .ledger {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 22px;
   }
@@ -196,6 +196,7 @@
   .btn-gov:active { border-style: inset; }
 
   /* ── Register table ──────────────────────────────────── */
+  .table-scroll { overflow-x: auto; }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -213,6 +214,7 @@
     letter-spacing: 0.4px;
     font-family: Georgia, serif;
     border-right: 1px solid #16537A;
+    white-space: nowrap;
   }
   td {
     padding: 8px 10px;
@@ -256,12 +258,40 @@
   .status-follow_up_pending { color: #A05A00; border-color: #A05A00; }
   .status-resolved { color: #0F5D1F; border-color: #0F5D1F; }
 
-  .row-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  /* ── Ambulance status tags ───────────────────────────── */
+  .amb-tag {
+    display: inline-block; padding: 3px 8px; font-size: 0.625rem;
+    font-weight: bold; border: 1px solid; text-transform: uppercase;
+    border-radius: 2px; letter-spacing: 0.3px;
+  }
+  .amb-requested { color: #8B6914; border-color: #B8860B; background: #FFF8E1; }
+  .amb-confirmed { color: #0B3D62; border-color: #0B3D62; background: #E4EEF5; }
+  .amb-dispatched { color: #0F5D1F; border-color: #138808; background: #E8F5E9; }
+  .amb-arrived { color: #1A1A1A; border-color: #1A1A1A; background: #C8E6C9; }
+
+  /* ── Species confirmation ────────────────────────────── */
+  .species-match { color: #0F5D1F; font-size: 0.625rem; font-weight: bold; }
+  .species-mismatch { color: #8B1A1A; font-size: 0.625rem; font-weight: bold; }
+  .species-select {
+    font-size: 0.625rem; padding: 2px 4px; border: 1px solid #B8AF8F;
+    background: #FBF9F1; font-family: Verdana, sans-serif;
+  }
+
+  .row-actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
   .row-actions button {
     font-size: 0.625rem; padding: 3px 6px; background: #F3EFE2;
-    border: 1px outset #B8AF8F; cursor: pointer;
+    border: 1px outset #B8AF8F; cursor: pointer; white-space: nowrap;
   }
   .row-actions button:hover { background: #E8E2CC; }
+  .row-actions button:disabled { opacity: 0.4; cursor: default; }
+  .row-actions button.amb-confirm-btn {
+    background: #FFF8E1; border-color: #B8860B; color: #8B6914;
+  }
+  .row-actions button.amb-confirm-btn:hover { background: #FFECB3; }
+  .row-actions button.amb-dispatch-btn {
+    background: #E8F5E9; border-color: #138808; color: #0F5D1F;
+  }
+  .row-actions button.amb-dispatch-btn:hover { background: #C8E6C9; }
 
   .loading { text-align: center; padding: 26px; color: #5A5238; font-style: italic; }
 
@@ -308,7 +338,7 @@
     padding: 18px 16px 22px;
     margin-top: 30px;
   }
-  footer .foot-inner { max-width: 980px; margin: 0 auto; }
+  footer .foot-inner { max-width: 1100px; margin: 0 auto; }
   footer .foot-links { margin-bottom: 10px; }
   footer .foot-links a { color: #C9C2A6; margin-right: 14px; text-decoration: none; }
   footer .foot-links a:hover { text-decoration: underline; color: #fff; }
@@ -382,7 +412,7 @@
 
 <div class="ticker-wrap">
   <div class="ticker">
-    ⚠ 24×7 EMERGENCY HELPLINE ACTIVE &nbsp;&nbsp;&#8226;&nbsp;&nbsp; ALL PATIENTS RECEIVE POLYVALENT ANTIVENOM REGARDLESS OF SPECIES &nbsp;&nbsp;&#8226;&nbsp;&nbsp; DO NOT CUT THE WOUND, DO NOT APPLY A TOURNIQUET, DO NOT ATTEMPT TO SUCK VENOM &nbsp;&nbsp;&#8226;&nbsp;&nbsp; NEAREST IS NOT ALWAYS BEST — GO TO A CENTRE THAT STOCKS ASV &nbsp;&nbsp;&#8226;&nbsp;&nbsp; THIS PANEL REFRESHES AUTOMATICALLY EVERY 10 SECONDS &nbsp;&nbsp;&#8226;&nbsp;&nbsp;
+    ⚠ 24×7 EMERGENCY HELPLINE ACTIVE &nbsp;&nbsp;&#8226;&nbsp;&nbsp; ALL PATIENTS RECEIVE POLYVALENT ANTIVENOM REGARDLESS OF SPECIES &nbsp;&nbsp;&#8226;&nbsp;&nbsp; SPECIES PREDICTION DRIVES HOSPITAL PREP, NOT INJECTION &nbsp;&nbsp;&#8226;&nbsp;&nbsp; AMBULANCE REQUIRES CONFIRMATION BEFORE DISPATCH &nbsp;&nbsp;&#8226;&nbsp;&nbsp; DO NOT CUT THE WOUND, DO NOT APPLY A TOURNIQUET, DO NOT ATTEMPT TO SUCK VENOM &nbsp;&nbsp;&#8226;&nbsp;&nbsp; NEAREST IS NOT ALWAYS BEST — GO TO A CENTRE THAT STOCKS ASV &nbsp;&nbsp;&#8226;&nbsp;&nbsp; THIS PANEL REFRESHES AUTOMATICALLY EVERY 10 SECONDS &nbsp;&nbsp;&#8226;&nbsp;&nbsp;
   </div>
 </div>
 
@@ -398,6 +428,7 @@
     <div class="ledger-box"><div class="n" id="total">—</div><div class="lbl">Total Cases Filed</div></div>
     <div class="ledger-box"><div class="n" id="whatsapp">—</div><div class="lbl">Via WhatsApp Channel</div></div>
     <div class="ledger-box"><div class="n" id="ivr">—</div><div class="lbl">Via Voice / IVR Channel</div></div>
+    <div class="ledger-box"><div class="n" id="amb-pending">—</div><div class="lbl">🚑 Ambulance Pending</div></div>
   </div>
 
   <div class="panel-title">
@@ -405,14 +436,16 @@
     <button class="btn-gov" onclick="loadCases()">⟳ Refresh Register</button>
   </div>
 
+  <div class="table-scroll">
   <table>
     <thead>
-      <tr><th>File No.</th><th>Date &amp; Time</th><th>Channel</th><th>Probable Species</th><th>Reporting Contact</th><th>Status</th><th>Actions</th></tr>
+      <tr><th>File No.</th><th>Date &amp; Time</th><th>Channel</th><th>Likely Species</th><th>🚑 Ambulance</th><th>Contact</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody id="cases-body">
-      <tr><td colspan="7" class="loading">Loading register…</td></tr>
+      <tr><td colspan="8" class="loading">Loading register…</td></tr>
     </tbody>
   </table>
+  </div>
 
   <div class="panel-title" id="alerts-section">
     <span>OUTGOING HOSPITAL CORRESPONDENCE LOG</span>
@@ -463,7 +496,7 @@ renderOdometer();
 document.getElementById('last-updated').textContent =
   new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 
-// ── Data logic (unchanged from original) ──────────────────
+// ── Data logic ────────────────────────────────────────────
 function getSnakeClass(snake) {
   if (!snake) return "unknown";
   if (snake.includes("Cobra")) return "cobra";
@@ -493,6 +526,93 @@ function fileNumber(c, index) {
   return `AHIVACH/2026/KA/${suffix}`;
 }
 
+// ── Ambulance status helpers ──────────────────────────────
+function ambStatusTag(status) {
+  const s = status || 'requested';
+  const labels = {
+    requested: '⏳ REQUESTED',
+    confirmed: '📞 CONFIRMED',
+    dispatched: '🚑 DISPATCHED',
+    arrived: '✅ ARRIVED',
+  };
+  return `<span class="amb-tag amb-${s}">${labels[s] || s.toUpperCase()}</span>`;
+}
+
+function ambActions(c) {
+  const s = c.ambulance_status || 'requested';
+  if (s === 'requested') {
+    return `<button class="amb-confirm-btn" onclick="confirmAmbulance('${c.id}')" title="Call patient to verify, then confirm">📞 Call &amp; Confirm</button>`;
+  }
+  if (s === 'confirmed') {
+    return `<button class="amb-dispatch-btn" onclick="dispatchAmbulance('${c.id}')" title="Dispatch ambulance to patient location">🚑 Dispatch</button>`;
+  }
+  if (s === 'dispatched') {
+    return `<button onclick="arriveAmbulance('${c.id}')" title="Mark ambulance as arrived">✅ Arrived</button>`;
+  }
+  return '<span style="font-size:0.625rem;color:#0F5D1F;">✅ Complete</span>';
+}
+
+// ── Species confirmation helpers ──────────────────────────
+const SPECIES_OPTIONS = [
+  'Indian Cobra', 'Common Krait', "Russell's Viper", 'Saw-Scaled Viper', 'Other', 'Unconfirmed'
+];
+
+function speciesConfirmUI(c) {
+  if (c.confirmed_species) {
+    const predicted = c.snake_identified || 'Unknown';
+    const actual = c.confirmed_species;
+    const match = predicted === actual;
+    const icon = match ? '✅' : '⚠️';
+    const cls = match ? 'species-match' : 'species-mismatch';
+    const label = match ? 'Prediction matched' : 'Prediction differed — data fed back';
+    return `<span class="${cls}">${icon} ${label}</span><br><span style="font-size:0.6rem;color:#5A5238;">Actual: ${actual}</span>`;
+  }
+  const opts = SPECIES_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join('');
+  return `<select class="species-select" id="species-${c.id}"><option value="">— Confirm species —</option>${opts}</select>
+    <button onclick="confirmSpecies('${c.id}')" style="font-size:0.6rem;padding:2px 4px;margin-left:2px;">Save</button>`;
+}
+
+// ── API calls ─────────────────────────────────────────────
+async function confirmAmbulance(caseId) {
+  if (!confirm('Have you called the patient to verify this is a genuine emergency?\n\nPress OK to confirm and enable ambulance dispatch.')) return;
+  try {
+    const res = await fetch(`/api/cases/${caseId}/ambulance/confirm`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) { alert('Could not confirm: ' + e.message); }
+}
+
+async function dispatchAmbulance(caseId) {
+  if (!confirm('Dispatch ambulance to patient location?')) return;
+  try {
+    const res = await fetch(`/api/cases/${caseId}/ambulance/dispatch`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) { alert('Could not dispatch: ' + e.message); }
+}
+
+async function arriveAmbulance(caseId) {
+  try {
+    const res = await fetch(`/api/cases/${caseId}/ambulance/arrived`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) { alert('Could not update: ' + e.message); }
+}
+
+async function confirmSpecies(caseId) {
+  const sel = document.getElementById(`species-${caseId}`);
+  if (!sel || !sel.value) { alert('Please select a species first.'); return; }
+  try {
+    const res = await fetch(`/api/cases/${caseId}/confirm-species`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmed_species: sel.value })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    loadCases();
+  } catch (e) { alert('Could not save species confirmation: ' + e.message); }
+}
+
 async function loadStatus() {
   try {
     const res = await fetch('/api/status');
@@ -514,15 +634,17 @@ async function loadCases() {
 
     document.getElementById("total").textContent = cases.length;
     document.getElementById("whatsapp").textContent =
-      cases.filter(c => c.channel === "whatsapp").length;
+      cases.filter(c => c.channel === "whatsapp" || c.channel === "whatsapp_meta").length;
     document.getElementById("ivr").textContent =
       cases.filter(c => c.channel === "ivr" || c.channel === "ivr-sim").length;
+    document.getElementById("amb-pending").textContent =
+      cases.filter(c => (c.ambulance_status || 'requested') !== 'arrived').length;
 
     const tbody = document.getElementById("cases-body");
 
     if (cases.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="7" class="loading">
+        <tr><td colspan="8" class="loading">
           No cases filed yet. Use "File a Test Case" or the WhatsApp Channel Demo
           above to generate a register entry.
         </td></tr>`;
@@ -534,25 +656,27 @@ async function loadCases() {
         <td class="file-no">${fileNumber(c, i)}</td>
         <td>${formatTime(c.created_at)}</td>
         <td><span class="channel-tag">${
-          c.channel === "whatsapp" ? "WHATSAPP" :
+          c.channel === "whatsapp" || c.channel === "whatsapp_meta" ? "WHATSAPP" :
           c.channel === "web" ? "WEB PORTAL" :
           c.channel === "ivr-sim" ? "VOICE (SIM)" : "VOICE / IVR"
         }</span></td>
         <td><span class="tag ${getSnakeClass(c.snake_identified)}">${c.snake_identified || "Unknown"}</span></td>
+        <td>${ambStatusTag(c.ambulance_status)}</td>
         <td>${maskContact(c.patient_contact)}</td>
         <td><span class="status-tag status-${c.case_status || 'reported'}">${(c.case_status || 'reported').replace(/_/g, ' ')}</span></td>
         <td>
           <div class="row-actions">
-            <button onclick="dispatchRescuer('${c.id}')">Dispatch Rescuer</button>
+            ${ambActions(c)}
             <button onclick="logFollowup('${c.id}')">Log Follow-up</button>
           </div>
+          <div style="margin-top:4px;">${speciesConfirmUI(c)}</div>
         </td>
       </tr>
     `).join("");
 
   } catch (error) {
     document.getElementById("cases-body").innerHTML = `
-      <tr><td colspan="5" class="loading">Error loading register: ${error}</td></tr>`;
+      <tr><td colspan="8" class="loading">Error loading register: ${error}</td></tr>`;
     console.error(error);
   }
 }
@@ -584,26 +708,7 @@ async function loadAlerts() {
   }
 }
 
-// ── Rescuer dispatch / follow-up (demo-simple prompt-based UI) ─
-// These call the routes in followup_routes_reference.js — wire that
-// file into your Node backend, then these buttons will work.
-async function dispatchRescuer(caseId) {
-  const rescuer_name = prompt('Rescuer name:');
-  if (rescuer_name === null) return;
-  const contact_number = prompt('Rescuer contact number (optional):') || '';
-  try {
-    const res = await fetch(`/api/cases/${caseId}/rescuer`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rescuer_name, contact_number })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    loadCases();
-  } catch (e) {
-    alert('Could not log rescuer dispatch: ' + e.message);
-  }
-}
-
+// ── Follow-up (kept from original) ────────────────────────
 async function logFollowup(caseId) {
   const outcome = prompt('Outcome — recovered / still_under_treatment / lost_to_followup / deceased:');
   if (!outcome) return;
