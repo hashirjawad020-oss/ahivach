@@ -100,31 +100,26 @@ def setup_web_routes(app):
     @app.post("/web/call/start")
     async def web_call_start(payload: dict = Body(...)):
         """
-        Simulates a call connecting: plays the common protocol,
-        no side effects yet — mirrors ivr.py's /voice route
-        exactly (nothing fires until a key is pressed).
-        """
-        return {"message": COMMON_PROTOCOL}
-
-    @app.post("/web/call/keypress")
-    async def web_call_keypress(payload: dict = Body(...)):
-        """
-        Simulates pressing a key on the call.
-        payload: {"session_id": str, "digit": "1".."5" or "" }
-        Mirrors ivr.py's /voice/snake-selected — fires the alert
-        and log exactly once, here, on the keypress (or on empty
-        digit if simulating a timeout).
+        Simulates the simplified outbound call flow:
+        Plays the common protocol, logs the case as Unknown,
+        and fires the hospital alert immediately (no keypress).
         """
         session_id = payload.get("session_id", "unknown")
-        digit = payload.get("digit", "")
-
-        snake = SNAKE_MAP.get(digit, "Unknown")
-        warning = IVR_WARNINGS[snake]
-
-        send_hospital_alert(snake, f"web-call:{session_id}", "ivr-sim")
+        
+        # Fire hospital alert
+        send_hospital_alert("Unknown", f"web-call:{session_id}", "ivr-sim")
+        
+        # Log case
         log_case(
-            f"web-call:{session_id}", "ivr-sim", snake,
-            f"key_{digit}" if digit else "no_input"
+            f"web-call:{session_id}", "ivr-sim", "Unknown", "auto_logged_on_call"
         )
 
-        return {"message": warning, "snake": snake}
+        follow_up = (
+            "Your case has been registered with AHIVACH. "
+            "A hospital has been alerted and an ambulance has been requested. "
+            "Stay calm, keep the bitten limb below heart level, "
+            "and do not apply any tourniquet or cut the wound. "
+            "Help is on the way. Goodbye."
+        )
+
+        return {"message": COMMON_PROTOCOL + "\n\n(English Follow-up)\n" + follow_up}

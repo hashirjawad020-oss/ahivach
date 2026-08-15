@@ -189,14 +189,7 @@
         <div class="case-file-label">CASE FILE — FORM B — VOICE / IVR CALL SIMULATION</div>
         <div class="chat" id="call-log"></div>
         <div class="call-status" id="call-status"></div>
-        <div class="controls">
-          <button class="btn-gov digit" onclick="pressDigit('1')">1 — COBRA</button>
-          <button class="btn-gov digit" onclick="pressDigit('2')">2 — KRAIT</button>
-          <button class="btn-gov digit" onclick="pressDigit('3')">3 — RUSSELL'S</button>
-          <button class="btn-gov digit" onclick="pressDigit('4')">4 — SAW-SCALED</button>
-          <button class="btn-gov digit" onclick="pressDigit('5')">5 — UNSURE</button>
-        </div>
-        <button class="btn-restart" onclick="restartCall()">↻ End and start a new call</button>
+        <button class="btn-restart" onclick="restartCall()">↻ Start a new call simulation</button>
       </div>
     </div>
   </div>
@@ -275,19 +268,12 @@ async function startCall() {
   const data = await res.json();
   document.getElementById('call-status').textContent = 'AUDIO PLAYBACK (as heard on a real call):';
   addBubble('call-log', data.message, false);
-}
-
-async function pressDigit(digit) {
-  document.getElementById('call-status').textContent = `KEYPRESS RECEIVED: ${digit} — PROCESSING…`;
-  const res = await fetch('/web/call/keypress', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: callSessionId, digit })
-  });
-  const data = await res.json();
-  addBubble('call-log', data.message, false, true);
-  document.getElementById('call-status').textContent =
-    'CALL ENDED — HOSPITAL ALERTED — CASE LOGGED TO REGISTER — AMBULANCE REQUESTED.';
+  
+  // Simulate call completion after audio plays
+  setTimeout(() => {
+    document.getElementById('call-status').textContent =
+      'CALL ENDED — HOSPITAL ALERTED — CASE LOGGED TO REGISTER AS "UNKNOWN" — AMBULANCE REQUESTED.';
+  }, 2000);
 }
 
 function restartCall() {
