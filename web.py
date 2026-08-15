@@ -22,6 +22,12 @@ from core import (
     HOSPITAL_PREP,
 )
 
+import hashlib
+
+def get_fake_contact(session_id, prefix="98765"):
+    h = int(hashlib.sha256(session_id.encode()).hexdigest(), 16)
+    return f"+91{prefix}{h % 100000:05d}"
+
 # Key = session_id (a random id the browser generates per tab),
 # value = progress through the 4 questions. Same in-memory
 # caveat as whatsapp.py's sessions.
@@ -82,12 +88,13 @@ def setup_web_routes(app):
         snake = identify_snake(session["answers"])
         session["complete"] = True
 
-        send_hospital_alert(snake, f"web-session:{session_id}", "web")
-        log_case(f"web-session:{session_id}", "web", snake, session["answers"])
+        contact = get_fake_contact(session_id, prefix="98765")
+        send_hospital_alert(snake, contact, "web")
+        log_case(contact, "web", snake, session["answers"])
 
         reply = FIRST_AID[snake] + "\n\n" + recommended_hospitals_text()
         hospital_preview = build_hospital_message(
-            snake, f"web-session:{session_id}", "web"
+            snake, contact, "web"
         )
         return {
             "reply": reply,
@@ -105,13 +112,14 @@ def setup_web_routes(app):
         and fires the hospital alert immediately (no keypress).
         """
         session_id = payload.get("session_id", "unknown")
+        contact = get_fake_contact(session_id, prefix="91234")
         
         # Fire hospital alert
-        send_hospital_alert("Unknown", f"web-call:{session_id}", "ivr-sim")
+        send_hospital_alert("Unknown", contact, "ivr-sim")
         
         # Log case
         log_case(
-            f"web-call:{session_id}", "ivr-sim", "Unknown", "auto_logged_on_call"
+            contact, "ivr-sim", "Unknown", "auto_logged_on_call"
         )
 
         follow_up = (

@@ -414,7 +414,11 @@ function getSnakeClass(snake) {
 
 function formatTime(timestamp) {
   if (!timestamp) return "—";
-  const d = new Date(timestamp);
+  let ts = timestamp;
+  if (!ts.endsWith('Z') && !ts.includes('+')) {
+    ts += 'Z';
+  }
+  const d = new Date(ts);
   if (isNaN(d.getTime())) return timestamp;
   return d.toLocaleString("en-IN", {
     day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
@@ -423,6 +427,12 @@ function formatTime(timestamp) {
 
 function maskContact(contact) {
   if (!contact) return "—";
+  if (contact.startsWith("web-call:") || contact.startsWith("web-session:")) {
+    let sum = 0;
+    for (let i = 0; i < contact.length; i++) sum += contact.charCodeAt(i);
+    let prefix = contact.startsWith("web-call") ? "91234" : "98765";
+    return `+91 ${prefix} ${(sum % 100000).toString().padStart(5, '0')}`;
+  }
   return contact.replace(/(\+?\d{2,3})(\d+)(\d{4})/, "$1****$3");
 }
 
