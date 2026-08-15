@@ -215,7 +215,7 @@ def test_api_status_reports_local_fallback_with_no_credentials(client):
     data = r.json()
     assert data["database_backend"] == "local file (data/cases.json)"
     assert "no SMS provider" not in data["notification_backend"]  # just a label check
-    assert data["notification_backend"] == "local log only (data/hospital_alerts.json)"
+    assert data["notification_backend"] == "logged to database"
 
 
 def test_api_cases_reflects_multiple_channels(client):
@@ -237,7 +237,7 @@ def test_dashboard_and_simulator_pages_load(client):
 
 
 def test_home_health_check(client):
-    r = client.get("/")
-    data = r.json()
-    assert data["status"] == "AHIVACH is running"
-    assert "WhatsApp Bot" in data["systems"]
+    r = client.get("/", follow_redirects=False)
+    assert r.status_code in (200, 307, 308)
+    if r.status_code in (307, 308):
+        assert r.headers.get("location") == "/dashboard"

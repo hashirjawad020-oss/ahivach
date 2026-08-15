@@ -319,6 +319,193 @@
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
     border-top: 1px solid #16537A; padding-top: 10px;
   }
+
+  /* ── Knowledge base section ──────────────────────────── */
+  .kb-section {
+    margin-bottom: 26px;
+    border: 1px solid #8A8370;
+    background: #FBF9F1;
+  }
+  .kb-section > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    font-family: Georgia, serif;
+    font-size: 0.9375rem;
+    font-weight: bold;
+    color: #0B3D62;
+    border-bottom: 1px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .kb-section > summary::-webkit-details-marker { display: none; }
+  .kb-section[open] > summary { border-bottom: 1px solid #B8AF8F; }
+  .kb-section > summary .hint {
+    font-family: Verdana, sans-serif;
+    font-size: 0.625rem;
+    font-weight: normal;
+    color: #5A5238;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .kb-body { padding: 16px; }
+
+  .kb-block { margin-bottom: 22px; }
+  .kb-block-title {
+    font-family: Georgia, serif;
+    font-size: 0.8125rem;
+    color: #8B1A1A;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .kb-prose {
+    font-size: 0.75rem;
+    color: #3A3524;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+
+  .kb-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .kb-stat {
+    background: #F4F0E1;
+    border: 1px solid #B8AF8F;
+    padding: 10px;
+    text-align: center;
+  }
+  .kb-stat .num {
+    font-family: Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #8B1A1A;
+    line-height: 1.1;
+  }
+  .kb-stat .lbl { font-size: 0.6875rem; color: #5A5238; margin-top: 4px; }
+
+  .snake-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .snake-card {
+    border: 1px solid #8A8370;
+    background: #fff;
+    padding: 10px 12px;
+  }
+  .snake-card h4 {
+    font-size: 0.8125rem;
+    color: #0B3D62;
+    margin-bottom: 2px;
+  }
+  .snake-card .sci {
+    font-style: italic;
+    font-size: 0.6875rem;
+    color: #5A5238;
+    margin-bottom: 6px;
+  }
+  .snake-card .venom {
+    display: inline-block;
+    font-size: 0.625rem;
+    font-weight: bold;
+    padding: 1px 6px;
+    border: 1px solid #B8860B;
+    color: #7A5C00;
+    margin-bottom: 8px;
+  }
+  .snake-card dl { font-size: 0.6875rem; }
+  .snake-card dt {
+    font-weight: bold;
+    color: #5A5238;
+    text-transform: uppercase;
+    font-size: 0.625rem;
+    margin-top: 5px;
+  }
+  .snake-card dd { color: #1A1A1A; margin-left: 0; line-height: 1.45; }
+  .snake-card .prep {
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: #FDF6E3;
+    border-left: 3px solid #8B1A1A;
+    font-size: 0.6875rem;
+  }
+
+  .kb-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 700px) { .kb-two-col { grid-template-columns: 1fr; } }
+
+  .kb-do, .kb-dont {
+    border: 1px solid #8A8370;
+    padding: 10px 12px;
+    background: #fff;
+  }
+  .kb-do { border-top: 3px solid #138808; }
+  .kb-dont { border-top: 3px solid #8B1A1A; }
+  .kb-do h4 { color: #0F5D1F; font-size: 0.75rem; margin-bottom: 8px; }
+  .kb-dont h4 { color: #8B1A1A; font-size: 0.75rem; margin-bottom: 8px; }
+  .kb-list { padding-left: 1rem; font-size: 0.6875rem; line-height: 1.55; }
+  .kb-list li { margin-bottom: 5px; }
+
+  .kb-asv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .kb-asv-card {
+    border: 1px solid #B8AF8F;
+    background: #F4F0E1;
+    padding: 8px 10px;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+  }
+
+  .kb-myth {
+    border: 1px solid #8A8370;
+    background: #fff;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 0.6875rem;
+  }
+  .kb-myth .myth { color: #8B1A1A; font-weight: bold; margin-bottom: 3px; }
+  .kb-myth .fact { color: #3A3524; }
+
+  .kb-prev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .kb-prev-card {
+    border: 1px solid #B8AF8F;
+    background: #F4F0E1;
+    padding: 8px 10px;
+    font-size: 0.6875rem;
+  }
+  .kb-prev-card strong { display: block; color: #0B3D62; margin-bottom: 3px; }
+
+  .kb-sources {
+    border-top: 1px dashed #B8AF8F;
+    padding-top: 10px;
+    font-size: 0.6875rem;
+    color: #5A5238;
+    line-height: 1.55;
+  }
+  .kb-sources ol { padding-left: 1.2rem; }
+  .kb-sources li { margin-bottom: 4px; }
+  .kb-disclaimer {
+    margin-top: 10px;
+    font-size: 0.625rem;
+    font-style: italic;
+    color: #5A5238;
+  }
 </style>
 </head>
 <body>
@@ -337,6 +524,7 @@
 <nav class="gov-nav">
   <a href="/dashboard" class="active">LIVE CASE REGISTER</a>
   <a href="#alerts-section">HOSPITAL CORRESPONDENCE</a>
+  <a href="#knowledge-section">KNOW ALL ABOUT SNAKES</a>
   <a href="/prevention">PREVENTION</a>
   <a href="/emergency-card">EMERGENCY CARD</a>
 </nav>
@@ -379,6 +567,205 @@
     <span>OUTGOING HOSPITAL CORRESPONDENCE LOG</span>
   </div>
   <div id="alerts-list"></div>
+
+  <details class="kb-section" id="knowledge-section" open>
+    <summary>
+      <span>KNOW ALL ABOUT SNAKES — Community Knowledge Base</span>
+      <span class="hint">Click to expand / collapse</span>
+    </summary>
+    <div class="kb-body">
+
+      <!-- BLOCK A: THE SCALE -->
+      <div class="kb-block">
+        <div class="kb-block-title">A — The Scale of the Problem in India</div>
+        <div class="kb-stat-grid">
+          <div class="kb-stat">
+            <div class="num">~58,000</div>
+            <div class="lbl">Estimated deaths per year in India — highest of any country</div>
+          </div>
+          <div class="kb-stat">
+            <div class="num">13,235</div>
+            <div class="lbl">Karnataka cases in 2024 (100 deaths) — up from 6,596 cases, 19 deaths in 2023</div>
+          </div>
+          <div class="kb-stat">
+            <div class="num">~70%</div>
+            <div class="lbl">Bites are non-venomous or dry — but ALL bites must be treated as emergencies</div>
+          </div>
+          <div class="kb-stat">
+            <div class="num">20–30%</div>
+            <div class="lbl">Of rural snakebite victims in India reach a hospital</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK B: THE BIG FOUR -->
+      <div class="kb-block">
+        <div class="kb-block-title">B — The Big Four — India's Most Dangerous Species</div>
+        <p class="kb-prose">India's polyvalent Anti-Snake Venom (ASV) covers all four species in one formulation. Species identification tells hospitals what to <strong>prepare for</strong> — ventilator, dialysis, or blood products — not which antivenom to use.</p>
+        <div class="snake-cards">
+
+          <div class="snake-card">
+            <h4>Indian Spectacled Cobra</h4>
+            <div class="sci">Naja naja</div>
+            <span class="venom">Neurotoxic + Cytotoxic</span>
+            <dl>
+              <dt>Identify by</dt>
+              <dd>Hood with spectacle marking; spreads hood when threatened; brown to black, 1.2–1.8 m</dd>
+              <dt>Active</dt>
+              <dd>Day or early evening; rice paddies, fields, termite mounds</dd>
+              <dt>Bite signs</dt>
+              <dd>Local swelling, blistering, necrosis; then drooping eyelids (ptosis), double vision, difficulty swallowing → respiratory paralysis</dd>
+              <dt>Onset</dt>
+              <dd>Neurological symptoms within 30 min – 6 hours</dd>
+            </dl>
+            <div class="prep"><strong>Hospital prep:</strong> Monitor descending paralysis; prepare ventilator; Atropine-Neostigmine challenge — cobra responds well.</div>
+          </div>
+
+          <div class="snake-card">
+            <h4>Common Krait</h4>
+            <div class="sci">Bungarus caeruleus</div>
+            <span class="venom">Neurotoxic (pre-synaptic)</span>
+            <dl>
+              <dt>Identify by</dt>
+              <dd>Shiny black/dark with white or pale cross-bands; vertebral ridge; slender, 1.0–1.5 m</dd>
+              <dt>Active</dt>
+              <dd><strong>Nocturnal.</strong> Bites sleeping people on floor beds; enters homes at night</dd>
+              <dt>Bite signs</dt>
+              <dd>Minimal or invisible bite marks. Victim wakes with severe abdominal pain and vomiting, then paralysis. Often misdiagnosed as food poisoning, appendicitis, or stroke</dd>
+              <dt>Onset</dt>
+              <dd>Delayed — 6–12 hours; ptosis recorded up to 36 hours after admission</dd>
+            </dl>
+            <div class="prep"><strong>Hospital prep:</strong> Pre-synaptic venom — does NOT respond to Atropine-Neostigmine; prepare mechanical ventilation (may be needed for days).</div>
+          </div>
+
+          <div class="snake-card">
+            <h4>Russell's Viper</h4>
+            <div class="sci">Daboia russelii</div>
+            <span class="venom">Hemotoxic + Nephrotoxic</span>
+            <dl>
+              <dt>Identify by</dt>
+              <dd>Stout body; three rows of dark reddish-brown oval spots on tan/brown background; loud hiss; 1.0–1.5 m</dd>
+              <dt>Active</dt>
+              <dd>Day and early darkness; farmlands, grasslands — very common in agriculture</dd>
+              <dt>Bite signs</dt>
+              <dd>Intense pain, severe swelling, bleeding from gums/bite site, blood in urine; clotting failure; kidney injury; shock. In Tamil Nadu and some Karnataka regions, also causes paralysis</dd>
+              <dt>Onset</dt>
+              <dd>Coagulopathy within 30 minutes; kidney failure over hours to days</dd>
+            </dl>
+            <div class="prep"><strong>Hospital prep:</strong> Run 20-min Whole Blood Clotting Test (20WBCT) immediately; prepare dialysis; blood products / FFP; watch for systemic capillary leak syndrome.</div>
+          </div>
+
+          <div class="snake-card">
+            <h4>Saw-Scaled Viper</h4>
+            <div class="sci">Echis carinatus</div>
+            <span class="venom">Hemotoxic (most common biter by volume)</span>
+            <dl>
+              <dt>Identify by</dt>
+              <dd>Small (0.4–0.8 m); rough keeled scales produce rasping sound when coiled; brown/grey with pale wavy pattern; dry, sandy, rocky terrain</dd>
+              <dt>Active</dt>
+              <dd>Nocturnal and diurnal; highly irritable; strikes rapidly and repeatedly</dd>
+              <dt>Bite signs</dt>
+              <dd>Local pain and swelling; bleeding from gums, nose, bite site; severe coagulopathy; unlike Russell's, rarely causes acute kidney injury</dd>
+              <dt>Onset</dt>
+              <dd>Coagulation failure within 1–3 hours</dd>
+            </dl>
+            <div class="prep"><strong>Hospital prep:</strong> Run 20WBCT; prepare blood products/FFP; dose is 6 vials ASV (lower than Russell's); monitor all bleeding sites.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BLOCK C: FIRST AID -->
+      <div class="kb-block">
+        <div class="kb-block-title">C — First Aid — Immediately After a Bite</div>
+        <p class="kb-prose">The single most important action is getting to a hospital as fast as possible. First aid buys time — it does not treat envenomation.</p>
+        <div class="kb-two-col">
+          <div class="kb-do">
+            <h4>✅ Do These Things</h4>
+            <ul class="kb-list">
+              <li>Stay calm — 70% of bites are non-venomous; panic spreads venom faster</li>
+              <li>Immobilise the bitten limb like a fracture (splint with stick, spade, rolled newspaper); keep limb BELOW heart level</li>
+              <li>Remove jewellery, watches, tight clothing near bite</li>
+              <li>Transport passively — patient must NOT walk, run, or drive</li>
+              <li>Note the time of bite — if safe, photograph the snake without approaching it</li>
+              <li>Call 108 and alert the nearest hospital IMMEDIATELY</li>
+              <li>Nothing by mouth until at hospital</li>
+            </ul>
+          </div>
+          <div class="kb-dont">
+            <h4>🚫 Never Do These Things</h4>
+            <ul class="kb-list">
+              <li>NEVER apply a tourniquet — causes gangrene and dramatically increases amputation rates</li>
+              <li>NEVER cut the wound or try to suck out venom — no evidence it works; wastes critical time</li>
+              <li>NEVER apply traditional remedies, black stones, herbs, or electric shock</li>
+              <li>NEVER attempt to kill or capture the snake — dead snakes can inject venom reflexively for hours</li>
+              <li>NEVER wash or interfere with the bite wound</li>
+              <li>NEVER give aspirin or NSAIDs — worsen haemorrhage; paracetamol only</li>
+              <li>NEVER let the victim walk or drive — physical exertion spreads venom through the lymphatic system</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK D: TREATMENT -->
+      <div class="kb-block">
+        <div class="kb-block-title">D — How Treatment Works at Hospital</div>
+        <div class="kb-asv-grid">
+          <div class="kb-asv-card"><strong>ASV is the only proven treatment.</strong> It contains antibodies made by hyperimmunising horses with Big Four venom.</div>
+          <div class="kb-asv-card"><strong>Polyvalent ASV</strong> covers all Big Four in one formulation — same product regardless of species.</div>
+          <div class="kb-asv-card">Species info changes <strong>how the hospital monitors</strong> the patient (ventilator vs dialysis), not what is injected.</div>
+          <div class="kb-asv-card"><strong>20WBCT test:</strong> 2 ml blood in a clean glass tube; if it doesn't clot in 20 min → viper envenomation confirmed → ASV immediately.</div>
+          <div class="kb-asv-card"><strong>ASV is given IV only</strong> — never intramuscular, never at the bite site. Children receive the same dose as adults.</div>
+        </div>
+      </div>
+
+      <!-- BLOCK E: MYTHS -->
+      <div class="kb-block">
+        <div class="kb-block-title">E — Myths That Kill</div>
+        <div class="kb-myth">
+          <div class="myth">Myth: A tourniquet stops venom spreading</div>
+          <div class="fact"><strong>Fact:</strong> Tourniquets trap venom, destroy tissue, and cause gangrene. Immobilise the limb — do not strangle it.</div>
+        </div>
+        <div class="kb-myth">
+          <div class="myth">Myth: Cut and suck works</div>
+          <div class="fact"><strong>Fact:</strong> Venom enters the lymphatic system within seconds — it cannot be sucked out. Cutting introduces infection and wastes time.</div>
+        </div>
+        <div class="kb-myth">
+          <div class="myth">Myth: No pain / no bite mark = no venom</div>
+          <div class="fact"><strong>Fact:</strong> Krait bites are painless and often leave no visible mark. Symptoms appear 6–12 hours later. All suspected bites need hospital observation.</div>
+        </div>
+        <div class="kb-myth">
+          <div class="myth">Myth: Traditional healers can treat it</div>
+          <div class="fact"><strong>Fact:</strong> No traditional remedy has proven benefit. Every hour without ASV increases the risk of death or permanent disability.</div>
+        </div>
+      </div>
+
+      <!-- BLOCK F: PREVENTION -->
+      <div class="kb-block">
+        <div class="kb-block-title">F — Prevention</div>
+        <div class="kb-prev-grid">
+          <div class="kb-prev-card"><strong>Gumboots &amp; thick trousers</strong> when working in fields, especially during monsoon (July–October = 76% of India's snakebite burden).</div>
+          <div class="kb-prev-card"><strong>Sleep on raised beds</strong> with mosquito nets — Krait is nocturnal and enters homes at night.</div>
+          <div class="kb-prev-card"><strong>Use a torch at night</strong> and make noise while walking; never reach into dark places without looking.</div>
+          <div class="kb-prev-card"><strong>Never handle or chase a snake</strong> — even a dead one can bite reflexively for hours.</div>
+        </div>
+      </div>
+
+      <!-- SOURCES -->
+      <div class="kb-sources">
+        <strong>Sources &amp; References</strong>
+        <ol>
+          <li>MoHFW/NCDC Standard Treatment Guidelines: Management of Snake Bite, 2017</li>
+          <li>Million Death Study (Mohapatra et al., PLOS NTDs, 2011)</li>
+          <li>Karnataka Health Ministry data via Deccan Herald, August 2025</li>
+          <li>PLOS NTDs: Big Four clinical framework review, June 2026</li>
+          <li>WHO Guidelines for Management of Snakebites, 2016</li>
+        </ol>
+        <div class="kb-disclaimer">For educational purposes only. Does not replace clinical diagnosis or treatment. In an emergency, call 108 or go directly to the nearest hospital with ASV stock.</div>
+      </div>
+
+    </div>
+  </details>
 
 </main>
 

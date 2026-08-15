@@ -100,26 +100,28 @@ def setup_web_routes(app):
     @app.post("/web/call/start")
     async def web_call_start(payload: dict = Body(...)):
         """
-        Simulates the simplified outbound call flow:
-        Plays the common protocol, logs the case as Unknown,
-        and fires the hospital alert immediately (no keypress).
+        Simulates IVR call connect: plays the common protocol only.
+        No alert or case log here — same rule as /voice in ivr.py.
+        """
+        return {"message": COMMON_PROTOCOL}
+
+    @app.post("/web/call/keypress")
+    async def web_call_keypress(payload: dict = Body(...)):
+        """
+        Simulates /voice/snake-selected: one keypress → one alert,
+        one case log, species-specific warning.
         """
         session_id = payload.get("session_id", "unknown")
-        
-        # Fire hospital alert
-        send_hospital_alert("Unknown", f"web-call:{session_id}", "ivr-sim")
-        
-        # Log case
+        digit = str(payload.get("digit", ""))
+        snake = SNAKE_MAP.get(digit, "Unknown")
+        warning = IVR_WARNINGS[snake]
+
+        send_hospital_alert(snake, f"web-call:{session_id}", "ivr-sim")
         log_case(
-            f"web-call:{session_id}", "ivr-sim", "Unknown", "auto_logged_on_call"
+            f"web-call:{session_id}",
+            "ivr-sim",
+            snake,
+            f"key_{digit}" if digit else "no_input",
         )
 
-        follow_up = (
-            "Your case has been registered with AHIVACH. "
-            "A hospital has been alerted and an ambulance has been requested. "
-            "Stay calm, keep the bitten limb below heart level, "
-            "and do not apply any tourniquet or cut the wound. "
-            "Help is on the way. Goodbye."
-        )
-
-        return {"message": COMMON_PROTOCOL + "\n\n(English Follow-up)\n" + follow_up}
+        return {"message": warning, "snake": snake}
