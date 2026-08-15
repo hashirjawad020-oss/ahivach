@@ -119,27 +119,18 @@ def setup_web_routes(app):
         one case log, species-specific warning.
         """
         session_id = payload.get("session_id", "unknown")
-<<<<<<< HEAD
         digit = str(payload.get("digit", ""))
         snake = SNAKE_MAP.get(digit, "Unknown")
         warning = IVR_WARNINGS[snake]
+        contact = get_fake_contact(session_id, prefix="91234")
 
-        send_hospital_alert(snake, f"web-call:{session_id}", "ivr-sim")
+        send_hospital_alert(snake, contact, "ivr-sim")
         log_case(
-            f"web-call:{session_id}",
+            contact,
             "ivr-sim",
             snake,
             f"key_{digit}" if digit else "no_input",
-=======
-        contact = get_fake_contact(session_id, prefix="91234")
-        
-        # Fire hospital alert
-        send_hospital_alert("Unknown", contact, "ivr-sim")
-        
-        # Log case
-        log_case(
-            contact, "ivr-sim", "Unknown", "auto_logged_on_call"
->>>>>>> 707fae63797eb0f4ce240cb17dd812a405c80106
         )
 
         return {"message": warning, "snake": snake}
+       
