@@ -156,39 +156,43 @@ def get_cases(limit=50):
 
 
 def log_alert(snake, patient_contact, channel, message, sent_via_sms):
-    """Logs a hospital alert to Supabase or local file."""
-    record = {
-        "id": str(uuid.uuid4()),
-        "snake": snake,
-        "patient_contact": patient_contact,
-        "channel": channel,
-        "message": message,
-        "sent_via_sms": sent_via_sms,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
+    """Logs a hospital alert to Supabase or local file. Never raises."""
+    try:
+        record = {
+            "id": str(uuid.uuid4()),
+            "snake": snake,
+            "patient_contact": patient_contact,
+            "channel": channel,
+            "message": message,
+            "sent_via_sms": sent_via_sms,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
 
-    if _using_supabase:
+        if _using_supabase:
+            try:
+                _supabase_client.table("hospital_alerts").insert({
+                    "snake": snake,
+                    "patient_contact": patient_contact,
+                    "channel": channel,
+                    "message": message,
+                    "sent_via_sms": sent_via_sms
+                }).execute()
+                print(f"[database] Alert logged to Supabase for {snake}")
+                return True
+            except Exception as e:
+                print(f"[database] Supabase alert insert failed, "
+                      f"writing to local file instead: {e}")
+
         try:
-            _supabase_client.table("hospital_alerts").insert({
-                "snake": snake,
-                "patient_contact": patient_contact,
-                "channel": channel,
-                "message": message,
-                "sent_via_sms": sent_via_sms
-            }).execute()
-            print(f"[database] Alert logged to Supabase for {snake}")
+            alerts = _read_local(LOCAL_ALERTS_FILE)
+            alerts.append(record)
+            _write_local(alerts, LOCAL_ALERTS_FILE)
             return True
         except Exception as e:
-            print(f"[database] Supabase alert insert failed, "
-                  f"writing to local file instead: {e}")
-
-    try:
-        alerts = _read_local(LOCAL_ALERTS_FILE)
-        alerts.append(record)
-        _write_local(alerts, LOCAL_ALERTS_FILE)
-        return True
+            print(f"[database] Local alert write failed: {e}")
+            return False
     except Exception as e:
-        print(f"[database] Local alert write failed: {e}")
+        print(f"[database] log_alert completely failed (non-fatal): {e}")
         return False
 
 

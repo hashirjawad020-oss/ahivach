@@ -106,10 +106,16 @@ def setup_ivr_routes(app):
         response.say("Repeating the instructions. " + warning, language="en-IN")
 
         # Fire hospital alert — exactly once per call
-        send_hospital_alert(snake, From, "ivr")
+        try:
+            send_hospital_alert(snake, From, "ivr")
+        except Exception as e:
+            print(f"[ivr] Hospital alert failed (non-fatal): {e}")
 
         # Log case — exactly once per call
-        log_case(From, "ivr", snake, f"key_{Digits}" if Digits else "no_input")
+        try:
+            log_case(From, "ivr", snake, f"key_{Digits}" if Digits else "no_input")
+        except Exception as e:
+            print(f"[ivr] Case logging failed (non-fatal): {e}")
 
         return Response(
             content=str(response),
